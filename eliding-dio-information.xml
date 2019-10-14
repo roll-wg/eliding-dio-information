@@ -1,0 +1,256 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE rfc SYSTEM "rfc2629-xhtml.ent">
+
+<?rfc toc="yes"?>
+<?rfc tocompact="yes"?>
+<?rfc tocdepth="3"?>
+<?rfc tocindent="yes"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes"?>
+<?rfc comments="yes"?>
+<?rfc inline="yes"?>
+<?rfc compact="no"?>
+<?rfc subcompact="no"?>
+<?rfc authorship="yes"?>
+<?rfc tocappendix="yes"?>
+<rfc  xmlns:xi="http://www.w3.org/2001/XInclude" category="info" ipr='trust200902' tocInclude="true"  obsoletes="" updates="6550" submissionType="IETF" xml:lang="en" version="3" docName="draft-thubert-roll-eliding-dio-information-00" >
+
+<front>
+   <title abbrev='Eliding RPL Info'>Eliding and Querying RPL Information</title>
+   <author initials='P' surname='Thubert' fullname='Pascal Thubert' role='editor'>
+      <organization abbrev='Cisco Systems'>Cisco Systems, Inc</organization>
+      <address>
+         <postal>
+            <street>Building D</street>
+            <street>45 Allee des Ormes - BP1200 </street>
+            <city>MOUGINS - Sophia Antipolis</city>
+            <code>06254</code>
+            <country>FRANCE</country>
+         </postal>
+         <phone>+33 497 23 26 34</phone>
+         <email>pthubert@cisco.com</email>
+      </address>
+   </author>
+
+    <author fullname="Rahul Arvind Jadhav" initials="R.A." surname="Jadhav">
+        <organization>Huawei Tech</organization>
+        <address>
+            <postal>
+                <street>Kundalahalli Village, Whitefield,</street>
+                <city>Bangalore</city>
+                <region>Karnataka</region>
+                <code>560037</code>
+                <country>India</country>
+            </postal>
+            <phone>+91-080-49160700</phone>
+            <email>rahul.ietf@gmail.com</email>
+        </address>
+    </author>
+
+    <author initials="D." surname="Barthel" fullname="Dominique Barthel">
+      <organization>Orange Labs</organization>
+      <address>
+        <postal>
+          <street ascii="28 chemin du Vieux Chene">28 chemin du Vieux Chêne</street> <street>38243 Meylan</street>
+          <country>France</country>
+        </postal>
+        <email>dominique.barthel@orange.com</email>
+      </address>
+    </author>
+
+   <date/>
+   <area>Routing Area</area>
+   <workgroup>ROLL</workgroup>
+   <keyword>Draft</keyword>
+   <abstract>
+      <t>
+      This document presents a method to elide a group of critical RPL options.
+      Whenever one information is changed in any of those options, a new
+      sequence counter is incremented. It is then used to resynchronize the
+      configuration state between parents and children. A node that missed a
+      DIO message with an update of any of those fields detects it by the
+      change of sequence counter and queries the update with a DIS Message.
+      </t>
+   </abstract>
+</front>
+
+<middle>
+   <section><name>Introduction</name>
+   <t>
+   Classical Link State protocol synchronize their Link State Database (LSDB) by
+   sequencing every change. Each interested node maintains the last sequence
+   of the LSDB it is synchronizing with. If a last known sequence is older than
+   the current, the node needs to learn one by one all the state changes between
+   the last known and the current state.
+   </t><t>
+   <xref target="RFC6550"/> does not operate that way. With RPL, the routing
+   information is repeated over and over in DODAG Information Object (DIO) and
+   Destination Advertisement Object (DAO) messages. There is no concept of
+   synchronization. The most recent information overrides a previous one and
+   a stale state eventually times out.
+   </t><t>
+   The RPL way was designed to enable routing from most to most most of the time
+   in a Low-Power Lossy Network (LLN) where the quality of the link and the cost
+   of communications does not permit to maintain a permanent synchronization.
+   This principle was applied to both the routing information and other state
+   such as configuration settings, prefix information, and node capabilities.
+   </t><t>
+   This other state may be needed to decide whether a node can join a network as
+   a leaf or as a router, and may affect the parent selection.
+   <xref target="RFC6550"/> allows a parent to elide that information in the DIO
+   it sends repeatedly, but if it does so, a sleeping child may end up possessing only
+   partial information (e.g., a prefix but not a configuration)
+   and not possess all the necessary information. If it is pessimistic, it may
+   query all possible information even when it is not needed. Conversely, a node
+   that slept and missed DIO messages may miss a change in critical information
+   and may not be aware of it, so it may fail to query the missing information
+   when needed.
+   </t><t>
+   This document uses a new sequence counter to synchronize the state in a child
+   node with that of its parent, and recursively with that of the network.
+   </t>
+   </section><!-- title="Introduction"-->
+
+   <section><name>Terminology</name>
+      <section anchor='bcp'> <name>BCP 14</name>
+        <t>
+        The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+        "OPTIONAL" in this document are to be interpreted as described in BCP 14
+        <xref target="RFC2119"/><xref target="RFC8174"/> when, and only when,
+        they appear in all capitals, as shown here.
+        </t>
+      </section> <!-- BCP 14 -->
+   </section><!-- Terminology -->
+   <section><name>Updating RFC 6550</name>
+
+   <t>
+   This document adds a sequence counter called RPL Configuration State Sequence
+   (RCSS) to the DIO message. The RCSS is set by the root and operated as
+   specified in Section 7 of <xref target="RFC6550"/>, more in
+   <xref target='rcss'/>.
+   </t><t>
+   This document modifies the Solicited Information Option to enable the
+   individual query of the protected options by a node that missed a change.
+   </t>
+   </section><!-- Updating RFC 6550 -->
+
+
+   <section  anchor='rcss'> <name>New RPL Configuration State Sequence</name>
+   <t>
+   The format of the DIO Base Object is defined in section 6.3.1 of
+   <xref target="RFC6550"/>. This specification uses a 8th octet that was
+   previously reserved to transport the RCSS.
+   </t>
+       <figure anchor="FigDIO">
+              <name>MOdified DIO Base Object</name>
+       <artwork align="center" name="" type="" alt="">
+        0                   1                   2                   3
+        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+       | RPLInstanceID |Version Number |             Rank              |
+       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+       |G|0| MOP | Prf |     DTSN      |     Flags     |      RCSS     |
+       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+       |                                                               |
+       +                                                               +
+       |                                                               |
+       +                            DODAGID                            +
+       |                                                               |
+       +                                                               +
+       |                                                               |
+       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+       |   Option(s)...
+       +-+-+-+-+-+-+-+-+
+       </artwork>
+       </figure>
+
+   <t>
+   Updated fields:
+   </t>
+   <dl newline="true" spacing="normal" indent="3">
+          <dt>RCSS</dt>
+          <dd>One Byte, the RPL Configuration State Sequence </dd>
+   </dl>
+   <t>
+   The RCSS protects network-wide options that are set by the root and that are
+   propagated without a change down the DODAG. The RCSS MUST be incremented when
+   the root sends a DIO where at least one of the protected options is modified.
+   It MUST propagated down without a change together with the options that it
+   protects.
+   </t><t>
+   During the straight part of the lollipop, a second reboot of the root might
+   not be recognized and a same value of the RCSS may appear with new values in
+   the protected options. For that reason the protected options MUST be present
+   in the DIOs during the straight part of the lollipop and the root SHOULD move
+   rapidly away from the straight part once the network has settled by resetting
+   the RCSS to 0, which places the RCSS in the circular region of the lollipop.
+   </t>
+   </section> <!-- New RPL Configuration State Sequence -->
+
+
+   <section  anchor='syopts'> <name>Protected Options</name>
+   <t>The protected options are:
+   </t>
+   <ol>
+
+   <li>The Route Information Option (RIO) </li>
+   <li>The Prefix Information Option (PIO) </li>
+   <li>The DODAG Configuration Option (DCO) </li>
+   <li>The Extended MOP Option (MOPex) </li>
+   <li>The Global Capabilities Option (GCO) </li>
+
+   </ol>
+   </section> <!-- Protected Options -->
+
+
+   <section  anchor='pullopts'> <name>Pulling Options</name>
+        <t>
+        </t>
+   </section> <!-- Pulling Options -->
+
+
+
+
+   <section><name>IANA Considerations</name>
+      <t>
+    This specification does not require IANA action.
+      </t>
+   </section>
+
+   <section anchor='sec'><name>Security Considerations</name>
+      <t>TBD
+      </t>
+   </section>
+
+
+
+	<section><name>Acknowledgments</name>
+		<t>
+
+   		</t>
+	</section><!-- ack -->
+</middle>
+
+
+<back>
+
+   <displayreference   target="I-D.ietf-roll-mopex-cap"              to="MOPEX-CAP"/>
+   <displayreference   target="RFC6550"                              to="RPL"/>
+
+   <references><name>Normative References</name>
+      <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml'/> <!-- BCP 14 -->
+      <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml'/> <!-- BCP 14 update -->
+      <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6550.xml'/> <!-- RPL -->
+      <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-roll-mopex-cap.xml'/>
+
+   </references>
+   <references><name>Informative References</name>
+
+
+   </references>
+</back>
+
+</rfc>
+
+<!-- CONVERT WARNING: wide character found at character 2041 of the output -->
