@@ -194,11 +194,13 @@
    </t>
    <ol>
 
-   <li>The Route Information Option (RIO) </li>
-   <li>The Prefix Information Option (PIO) </li>
-   <li>The DODAG Configuration Option (DCO) </li>
-   <li>The Extended MOP Option (MOPex) </li>
-   <li>The Global Capabilities Option (GCO) </li>
+   <li>The Route Information Option (RIO) defined in section 6.7.5 of <xref target="RFC6550"/></li>
+   <li>The DODAG Configuration Option (DCO) defined in section 6.7.6 of <xref target="RFC6550"/></li>
+   <li>The Prefix Information Option (PIO) defined in section 6.7.10 of <xref target="RFC6550"/></li>
+   <li>The Extended MOP Option (MOPex) defined in
+      <xref target="I-D.ietf-roll-mopex-cap" format="default"/></li>
+   <li>The Global Capabilities Option (GCO) defined in
+      <xref target="I-D.ietf-roll-mopex-cap" format="default"/></li>
 
    </ol>
    </section> <!-- Protected Options -->
