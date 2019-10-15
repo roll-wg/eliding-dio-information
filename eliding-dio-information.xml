@@ -75,7 +75,7 @@
 </front>
 
 <middle>
-   <section><name>Introduction</name>
+<section><name>Introduction</name>
    <t>
    Classical Link State protocol synchronize their Link State Database (LSDB) by
    sequencing every change. Each interested node maintains the last sequence
@@ -109,21 +109,81 @@
    This document uses a new sequence counter to synchronize the state in a child
    node with that of its parent, and recursively with that of the network.
    </t>
-   </section><!-- title="Introduction"-->
+</section><!-- title="Introduction"-->
 
-   <section><name>Terminology</name>
-      <section anchor='bcp'> <name>BCP 14</name>
-        <t>
-        The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-        "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
-        "OPTIONAL" in this document are to be interpreted as described in BCP 14
-        <xref target="RFC2119"/><xref target="RFC8174"/> when, and only when,
-        they appear in all capitals, as shown here.
-        </t>
-      </section> <!-- BCP 14 -->
-   </section><!-- Terminology -->
-   <section><name>Updating RFC 6550</name>
+<section><name>Terminology</name>
+<section anchor='bcp'> <name>BCP 14</name>
+   <t>
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in BCP 14
+   <xref target="RFC2119"/><xref target="RFC8174"/> when, and only when,
+   they appear in all capitals, as shown here.
+   </t>
+</section> <!-- BCP 14 -->
 
+
+<section anchor='lo'> <name>References</name>
+
+
+   <t>
+   The Terminology used in this document is consistent with and incorporates
+   that described in <xref target="RFC7102"> Terms Used in Routing for Low-Power
+   and Lossy Networks (LLNs).</xref>.
+   </t><t>
+   Other terms in use in LLNs are found in <xref target="RFC7228">
+   Terminology for Constrained-Node Networks</xref>.
+   </t><t>
+   A glossary of classical RPL acronyms is given in <xref target="gloss"/>.
+   </t><t>
+   The term “byte” is used in its now customary sense as a synonym for “octet”.
+   </t><t>
+   "RPL", "RPL Packet Information" (RPI) and "RPL Instance", DIO, DAO and DIS
+   messages are defined in the
+   <xref target="RFC6550">"RPL: IPv6 Routing Protocol for Low-Power and Lossy
+   Networks"</xref> specification.
+   </t><t>
+   This document uses the terms RPL-Unaware Leaf (RUL) and RPL Aware Leaf
+   (RAL) consistently with <xref target="I-D.ietf-roll-useofrplinfo" />.
+   </t><t>
+   The term RPL-Unaware Leaf (RUL) is used to refer to a node
+   that uses a RPL router (without necessarily knowing it) as 6LR and depends on
+   that router to obtain reachability for its addresses inside the RPL domain.
+   On the contrary, the term RPL-Aware Node (RAN) is used to refer to a RAL
+   or a RPL router that participates to RPL and advertises its addresses of
+   prefixes by itself.
+   </t>
+<!--
+<t>
+    Readers are expected to be familiar with all the terms and concepts
+    that are discussed in:
+</t>
+    <ul style="symbols">
+    <li> <xref target="RFC6550">"RPL: IPv6 Routing Protocol for Low-Power and Lossy Networks"</xref>. </li>
+    </ul>
+
+-->
+</section>	<!-- end section "References" -->
+<section anchor='gloss'> <name>Glossary</name>
+    <t> This document often uses the following acronyms:
+    </t>
+       <dl>
+       <dt>DODAG</dt><dd>Destination-Oriented Directed Acyclic Graph </dd>
+       <dt>LLN</dt><dd>Low-Power and Lossy Network </dd>
+       <dt>RPI</dt><dd>RPL Packet Information (an Option in the Hop-By_Hop Header)</dd>
+       <dt>RAL</dt><dd>RPL-Aware Leaf </dd>
+       <dt>RAN</dt><dd>RPL-Aware Node, a RPL router or a RPL-Aware Leaf </dd>
+       <dt>RS</dt><dd> Router Solicitation  </dd>
+       <dt>RPL</dt><dd>IPv6 Routing Protocol for LLNs (pronounced ripple) </dd>
+       <dt>RUL</dt><dd>RPL-Unaware Leaf </dd>
+       </dl>
+</section>	<!-- end section "Subset of a 6LoWPAN Glossary" -->
+
+</section>	<!-- end section "Terminology" -->
+
+
+
+<section><name>Updating RFC 6550</name>
    <t>
    This document adds a sequence counter called RPL Configuration State Sequence
    (RCSS) to the DIO message. The RCSS is set by the root and operated as
@@ -203,21 +263,85 @@
       <xref target="I-D.ietf-roll-mopex-cap" format="default"/></li>
 
    </ol>
+   <t>
+   When a protected option is unchanged from the previous DIOs, the root MAY
+   replace it with its abbreviated version. The abbreviated version of an option
+   is transported in a 4-bytes long Abbreviated Option Option (AOO). The AOO
+   indicates the RCSS at which the protected option was last changed.
+   </t>
+       <figure anchor="FigABB">
+              <name>Abbrev Option Format</name>
+       <artwork align="center" name="" type="" alt="">
+
+       0                   1                   2                   3
+       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2
+       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+       |  Option Type  | Option Length | Abbrev. opt.  | Last mod RCSS |
+       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+       </artwork>
+       </figure>
+   <t>
+   Option fields:
+   </t>
+   <dl newline="true" spacing="normal" indent="3">
+          <dt>Option Type</dt>
+          <dd>One Byte, value indicating Abbreviated Option to be assigned by IANA </dd>
+          <dt>Option Length</dt>
+          <dd>MUST be set to 2 indicating Option data of 2 bytes</dd>
+          <dt>Abbreviated Option</dt>
+          <dd>The Option Type of the option being abreviated </dd>
+          <dt>Last modification RCSS</dt>
+          <dd>The RCSS at which the option was last modified</dd>
+   </dl>
    </section> <!-- Protected Options -->
 
 
+   <section  anchor='childop'> <name>Child Operation</name>
+   <t>
+   When a field is modified in one of the protected options in a fashion that
+   may affect the routing or forwarding decision inside the DODAG, the root
+   MUST send a DIO with the proteted options. Unchanged options may be
+   abreviated as discussed in section  <xref target="syopts"/>
+   </t><t>
+   The freshness of the protected options is asserted based on the RCSS.
+   RCSS values are compared as described in section 7.2 of
+   <xref target="RFC6550"/>. When a parent expose a new RCSS, the child node
+   SHOULD refrain from using that parent until it has resynchronized all the
+   protected fields to the new RCSS. When it is resynchronized, the child SHOULD
+   refrain from using other parents that expose an older RCSS.
+   </t>
+   </section> <!-- Child Operation -->
+
+
    <section  anchor='pullopts'> <name>Pulling Options</name>
-        <t>
-        </t>
+   <t>
+   </t>
    </section> <!-- Pulling Options -->
 
 
 
+   <section anchor="SecurityConsiderations" numbered="true" toc="default">
+       <name>Security Considerations</name>
+   <t>TBD
+   </t>
+   </section>
 
-   <section><name>IANA Considerations</name>
-      <t>
-    This specification does not require IANA action.
-      </t>
+   <section numbered="true" toc="default"> <name>IANA Considerations</name>
+
+   <t>
+   A new entries is required for the new option of type "Abbreviated Option",
+   from the "RPL Control Message Options" space defined for
+   <xref target="RFC6550"/>.
+   </t>
+   <table anchor="iana"><name>New Option</name>
+   <thead>
+      <tr><td>Value</td><td>Meaning</td><td>Reference</td></tr>
+   </thead><tbody>
+      <tr><td>TBD IANA</td><td>Abbreviated Option</td><td>THIS RFC</td></tr>
+   </tbody>
+
+   </table>
    </section>
 
    <section anchor='sec'><name>Security Considerations</name>
@@ -244,8 +368,10 @@
       <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml'/> <!-- BCP 14 -->
       <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml'/> <!-- BCP 14 update -->
       <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6550.xml'/> <!-- RPL -->
+      <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7228.xml'/> <!-- Terminology for Constrained-Node Networks -->
+      <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7102.xml'/> <!-- Terms Used in Routing for Low-Power and Lossy Networks -->
       <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-roll-mopex-cap.xml'/>
-
+      <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-roll-useofrplinfo.xml'/>
    </references>
    <references><name>Informative References</name>
 
