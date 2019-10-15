@@ -16,13 +16,12 @@ Expires: 17 April 2020                                       R.A. Jadhav
 
 Abstract
 
-   This document presents a method to elide a group of critical RPL
-   options.  Whenever one information is changed in any of those
-   options, a new sequence counter is incremented.  It is then used to
-   resynchronize the configuration state between parents and children.
-   A node that missed a DIO message with an update of any of those
-   fields detects it by the change of sequence counter and queries the
-   update with a DIS Message.
+   This document presents a method to elide a group of global RPL
+   options by synchonizing the state associated with each of these
+   options between parent and child using a new sequence counter in DIO
+   messages.  A child that missed a DIO message with an update of any of
+   those protected options detects it by the change of sequence counter
+   and queries the update with a DIS Message.
 
 Status of This Memo
 
@@ -50,6 +49,7 @@ Copyright Notice
    Provisions Relating to IETF Documents (https://trustee.ietf.org/
    license-info) in effect on the date of publication of this document.
    Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
 
 
 
@@ -58,7 +58,6 @@ Thubert, et al.           Expires 17 April 2020                 [Page 1]
 Internet-Draft              Eliding RPL Info                October 2019
 
 
-   and restrictions with respect to this document.  Code Components
    extracted from this document must include Simplified BSD License text
    as described in Section 4.e of the Trust Legal Provisions and are
    provided without warranty as described in the Simplified BSD License.
@@ -98,14 +97,15 @@ Table of Contents
    of synchronization.  The most recent information overrides a previous
    one and a stale state eventually times out.
 
-   The RPL way was designed to enable routing from most to most most of
-   the time in a Low-Power Lossy Network (LLN) where the quality of the
-   link and the cost of communications does not permit to maintain a
-   permanent synchronization.  This principle was applied to both the
-   routing information and other state such as configuration settings,
-   prefix information, and node capabilities.
+   The RPL way was designed to enable routing from most nodes to most
+   nodes most of the time in a Low-Power Lossy Network (LLN) where the
+   quality of the links and the cost of communications does not permit
+   to maintain a permanent synchronization.  This principle was applied
+   to both the routing information and non-routing state such as
+   configuration settings, prefix information, and node capabilities.
 
-
+   This non-routing state may be needed to decide whether a node can
+   join a network as a leaf or as a router, and may affect the parent
 
 
 
@@ -114,16 +114,14 @@ Thubert, et al.           Expires 17 April 2020                 [Page 2]
 Internet-Draft              Eliding RPL Info                October 2019
 
 
-   This other state may be needed to decide whether a node can join a
-   network as a leaf or as a router, and may affect the parent
    selection.  [RPL] allows a parent to elide that information in the
-   DIO it sends repeatedly, but if it does so, a sleeping child may end
-   up possessing only partial information (e.g., a prefix but not a
-   configuration) and not possess all the necessary information.  If it
-   is pessimistic, it may query all possible information even when it is
-   not needed.  Conversely, a node that slept and missed DIO messages
-   may miss a change in critical information and may not be aware of it,
-   so it may fail to query the missing information when needed.
+   DIO it sends repeatedly, but if it does so, a newcomer child may have
+   missed the early DIOs that contained the configuration option and
+   live with only partial information.  If it is pessimistic, it may
+   query all possible information even when it is not needed.
+   Conversely, a node that slept may have missed a DIO message with a
+   change in some critical information and not be aware of it, so it may
+   fail to query for the update and operate on deprecated parameters.
 
    This document uses a new sequence counter to synchronize the state in
    a child node with that of its parent, and recursively with that of
@@ -162,6 +160,8 @@ Internet-Draft              Eliding RPL Info                October 2019
 
    The term RPL-Unaware Leaf (RUL) is used to refer to a node that uses
    a RPL router (without necessarily knowing it) as 6LR and depends on
+   that router to obtain reachability for its addresses inside the RPL
+   domain.  On the contrary, the term RPL-Aware Node (RAN) is used to
 
 
 
@@ -170,8 +170,6 @@ Thubert, et al.           Expires 17 April 2020                 [Page 3]
 Internet-Draft              Eliding RPL Info                October 2019
 
 
-   that router to obtain reachability for its addresses inside the RPL
-   domain.  On the contrary, the term RPL-Aware Node (RAN) is used to
    refer to a RAL or a RPL router that participates to RPL and
    advertises its addresses of prefixes by itself.
 
@@ -215,6 +213,8 @@ Internet-Draft              Eliding RPL Info                October 2019
    The format of the DIO Base Object is defined in section 6.3.1 of
    [RPL].  This specification uses a 8th octet that was previously
    reserved to transport the RCSS.
+
+
 
 
 
