@@ -13,7 +13,7 @@
 <?rfc subcompact="no"?>
 <?rfc authorship="yes"?>
 <?rfc tocappendix="yes"?>
-<rfc  xmlns:xi="http://www.w3.org/2001/XInclude" category="info" ipr='trust200902' tocInclude="true"  obsoletes="" updates="6550" submissionType="IETF" xml:lang="en" version="3" docName="draft-thubert-roll-eliding-dio-information-00" >
+<rfc  xmlns:xi="http://www.w3.org/2001/XInclude" category="std" ipr='trust200902' tocInclude="true"  obsoletes="" updates="6550" submissionType="IETF" xml:lang="en" version="3" docName="draft-thubert-roll-eliding-dio-information-00" >
 
 <front>
 
@@ -213,23 +213,23 @@
        <figure anchor="FigDIO">
               <name>MOdified DIO Base Object</name>
        <artwork align="center" name="" type="" alt="">
-        0                   1                   2                   3
-        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       | RPLInstanceID |Version Number |             Rank              |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |G|0| MOP | Prf |     DTSN      |     Flags     |      RCSS     |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |                                                               |
-       +                                                               +
-       |                                                               |
-       +                            DODAGID                            +
-       |                                                               |
-       +                                                               +
-       |                                                               |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |   Option(s)...
-       +-+-+-+-+-+-+-+-+
+  0                   1                   2                   3
+  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ | RPLInstanceID |Version Number |             Rank              |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |G|0| MOP | Prf |     DTSN      |     Flags     |      RCSS     |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                                                               |
+ +                                                               +
+ |                                                               |
+ +                            DODAGID                            +
+ |                                                               |
+ +                                                               +
+ |                                                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |   Option(s)...
+ +-+-+-+-+-+-+-+-+
        </artwork>
        </figure>
 
@@ -278,15 +278,13 @@
    indicates the RCSS at which the protected option was last changed.
    </t>
        <figure anchor="FigABB">
-              <name>Abbrev Option Format</name>
+              <name>Abbreviated Option Option Format</name>
        <artwork align="center" name="" type="" alt="">
-
-       0                   1                   2                   3
-       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |  Option Type  | Option Length | Abbrev. opt.  | Last mod RCSS |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |  Option Type  | Option Length | Abbrev. opt.  | Last mod RCSS |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
        </artwork>
        </figure>
    <t>
@@ -319,8 +317,9 @@
    protected fields to the latest. When it is resynchronized, the child SHOULD
    refrain from using other parents that expose an older RCSS.
    </t><t>
-   A child MUST keep track of the content of all the protected option and of the
-   RCSS of the DIO where this option was last seen in a non-abbreviated version.
+   A child MUST store the content of all the protected options and keep track of
+   the RCSS of the DIO where each of these option was last seen in a
+   non-abbreviated version.
    If that RCSS is fresher than the Last Modification RCSS in the abbreviated
    version of the option then the child is up-to-date for that option.
    If a protected option elided in a DIO and not abbreviated, and the child has
@@ -380,6 +379,7 @@
 
 <back>
 
+   <displayreference   target="I-D.ietf-roll-useofrplinfo"           to="USE_OF_RPL_INFO"/>
    <displayreference   target="I-D.ietf-roll-mopex-cap"              to="MOPEX-CAP"/>
    <displayreference   target="RFC6550"                              to="RPL"/>
 
