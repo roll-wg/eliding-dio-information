@@ -306,8 +306,7 @@ Internet-Draft              Eliding RPL Info                October 2019
    Option fields:
 
    Option Type
-      One Byte, value indicating Abbreviated Option to be assigned by
-      IANA
+      One byte indicating "Abbreviated Option, see Table 1
 
    Option Length
       MUST be set to 2 indicating Option data of 2 bytes
@@ -329,7 +328,8 @@ Internet-Draft              Eliding RPL Info                October 2019
    RCSS values are compared as described in section 7.2 of [RPL].  When
    a parent exposes a new RCSS, the child node SHOULD refrain from using
    that parent until it has resynchronized all the protected fields to
-
+   the latest.  When it is resynchronized, the child SHOULD refrain from
+   using other parents that expose an older RCSS.
 
 
 
@@ -337,9 +337,6 @@ Thubert, et al.           Expires 17 April 2020                 [Page 6]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
-
-   the latest.  When it is resynchronized, the child SHOULD refrain from
-   using other parents that expose an older RCSS.
 
    A child MUST store the content of all the protected options and keep
    track of the RCSS of the DIO where each of these option was last seen
@@ -370,7 +367,7 @@ Internet-Draft              Eliding RPL Info                October 2019
                | TBD IANA | Abbreviated Option | THIS RFC  |
                +----------+--------------------+-----------+
 
-                            Table 1: New Option
+                          Table 1: New Option Type
 
 10.  Security Considerations
 
@@ -385,6 +382,9 @@ Internet-Draft              Eliding RPL Info                October 2019
               Jadhav, R. and P. Thubert, "Mode of Operation extension
               and Capabilities", Work in Progress, Internet-Draft,
               draft-ietf-roll-mopex-cap-00, 9 August 2019,
+              <https://tools.ietf.org/html/draft-ietf-roll-mopex-cap-
+              00>.
+
 
 
 
@@ -393,9 +393,6 @@ Thubert, et al.           Expires 17 April 2020                 [Page 7]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
-
-              <https://tools.ietf.org/html/draft-ietf-roll-mopex-cap-
-              00>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -442,15 +439,15 @@ Authors' Addresses
    France
 
    Phone: +33 497 23 26 34
+   Email: pthubert@cisco.com
+
+
 
 
 
 Thubert, et al.           Expires 17 April 2020                 [Page 8]
 
 Internet-Draft              Eliding RPL Info                October 2019
-
-
-   Email: pthubert@cisco.com
 
 
    Dominique Barthel
@@ -471,6 +468,9 @@ Internet-Draft              Eliding RPL Info                October 2019
 
    Phone: +91-080-49160700
    Email: rahul.ietf@gmail.com
+
+
+
 
 
 

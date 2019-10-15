@@ -292,7 +292,7 @@
    </t>
    <dl newline="true" spacing="normal" indent="3">
           <dt>Option Type</dt>
-          <dd>One Byte, value indicating Abbreviated Option to be assigned by IANA </dd>
+          <dd>One byte indicating "Abbreviated Option, see <xref target="iana"/></dd>
           <dt>Option Length</dt>
           <dd>MUST be set to 2 indicating Option data of 2 bytes</dd>
           <dt>Abbreviated Option</dt>
@@ -352,7 +352,7 @@
    <xref target="RFC6550"/>.
    </t>
 
-   <table anchor="iana"><name>New Option</name>
+   <table anchor="iana"><name>New Option Type</name>
    <thead>
       <tr><td>Value</td><td>Meaning</td><td>Reference</td></tr>
    </thead><tbody>
