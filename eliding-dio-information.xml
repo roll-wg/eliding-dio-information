@@ -23,9 +23,9 @@
          <postal>
             <street>Building D</street>
             <street>45 Allee des Ormes - BP1200 </street>
-            <city>MOUGINS - Sophia Antipolis</city>
+            <city>Mougins - Sophia Antipolis</city>
             <code>06254</code>
-            <country>FRANCE</country>
+          <country>France</country>
          </postal>
          <phone>+33 497 23 26 34</phone>
          <email>pthubert@cisco.com</email>
@@ -51,7 +51,9 @@
       <organization>Orange Labs</organization>
       <address>
         <postal>
-          <street ascii="28 chemin du Vieux Chene">28 chemin du Vieux Chêne</street> <street>38243 Meylan</street>
+          <street ascii="28 chemin du Vieux Chene">28 chemin du Vieux Chêne</street>
+          <code>38243</code>
+          <city>Meylan</city>
           <country>France</country>
         </postal>
         <email>dominique.barthel@orange.com</email>
@@ -190,8 +192,13 @@
    specified in Section 7 of <xref target="RFC6550"/>, more in
    <xref target='rcss'/>.
    </t><t>
+   This document introduces a new RPL Control Message Options called the
+   Abbreviated Option Option (AOO). The AOO is an empty replacement of an
+   existing option that indicates the RCSS of the last change of that option.
+   </t><t>
    This document modifies the Solicited Information Option to enable the
-   individual query of the protected options by a node that missed a change.
+   individual query of the protected options by a node that missed a change,
+   more in <xref target='pullopts'/>.
    </t>
    </section><!-- Updating RFC 6550 -->
 
@@ -291,7 +298,7 @@
           <dd>MUST be set to 2 indicating Option data of 2 bytes</dd>
           <dt>Abbreviated Option</dt>
           <dd>The Option Type of the option being abreviated </dd>
-          <dt>Last modification RCSS</dt>
+          <dt>Last Modification RCSS</dt>
           <dd>The RCSS at which the option was last modified</dd>
    </dl>
    </section> <!-- Protected Options -->
@@ -301,15 +308,25 @@
    <t>
    When a field is modified in one of the protected options in a fashion that
    may affect the routing or forwarding decision inside the DODAG, the root
-   MUST send a DIO with the proteted options. Unchanged options may be
-   abreviated as discussed in section  <xref target="syopts"/>
+   MUST send a DIO with the protected options. Unchanged options may be
+   abreviated as discussed in <xref target="syopts"/>.
    </t><t>
    The freshness of the protected options is asserted based on the RCSS.
    RCSS values are compared as described in section 7.2 of
-   <xref target="RFC6550"/>. When a parent expose a new RCSS, the child node
+   <xref target="RFC6550"/>. When a parent exposes a new RCSS, the child node
    SHOULD refrain from using that parent until it has resynchronized all the
-   protected fields to the new RCSS. When it is resynchronized, the child SHOULD
+   protected fields to the latest. When it is resynchronized, the child SHOULD
    refrain from using other parents that expose an older RCSS.
+   </t><t>
+   A child MUST keep track of the content of all the protected option and of the
+   RCSS of the DIO where this option was last seen in a non-abbreviated version.
+   If that RCSS is fresher than the Last Modification RCSS in the abbreviated
+   version of the option then the child is up-to-date for that option.
+   If a protected option elided in a DIO and not abbreviated, and the child has
+   a stored RCSS value for that option that is lower than the RCSS in the DIO,
+   then the child MUST query that option from the parent to ensure that is has
+   the latest. This is done with a DIS message as indicated in
+   <xref target="pullopts"/>.
    </t>
    </section> <!-- Child Operation -->
 
