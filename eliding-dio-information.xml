@@ -82,9 +82,9 @@
    <t>
    Classical Link State protocol synchronize their Link State Database (LSDB) by
    sequencing every change. Each interested node maintains the last sequence
-   of the LSDB it is synchronizing with. If a last known sequence is older than
-   the current, the node needs to learn one by one all the state changes between
-   the last known and the current state.
+   of the LSDB it is synchronizing with. If the last known sequence number is
+   older than the current, the node needs to learn one by one all the state
+   changes between the last known and the current state.
    </t><t>
    <xref target="RFC6550"/> does not operate that way. With RPL, the routing
    information is repeated over and over in DODAG Information Object (DIO) and
@@ -95,9 +95,10 @@
    The RPL way was designed to enable routing from most nodes to most nodes most
    of the time in a Low-Power Lossy Network (LLN) where the quality of the links
    and the cost of communications does not permit to maintain a permanent
-   synchronization. This principle was applied to both the routing information
-   and non-routing state such as configuration settings, prefix information, and
-   node capabilities.
+   synchronization.
+   </t><t>
+   This principle was applied to both the routing and non-routing information
+   such as configuration settings, prefix information, and node capabilities.
    </t><t>
    This non-routing state is carried in RPL Messages as options. Some of the DIO
    options may be needed to decide whether a node can join a network as a leaf
@@ -106,13 +107,13 @@
    selects parents that are also synchronized to the freshest.
    </t><t>
    <xref target="RFC6550"/> allows a parent to elide options in the DIO messages
-   that it sends repeatedly, to conserve battery and save bandwidth. But when it
+   that it sends repeatedly, to conserve battery and save bandwidth. When it
    does so, a newcomer child that missed DIOs that contained the configuration
-   option may operate on default or partial. If it is pessimistic, it may query
-   all possible the information even when it is not needed. Conversely, a node
-   that slept may have missed a DIO with a change in some critical information
-   and may not be even aware of it, so it may fail to query for the update and
-   operate on deprecated parameters.
+   option may operate on default or partial information. If it is pessimistic,
+   it may query all possible the information even when it is not needed.
+   Conversely, a node that slept may have missed a DIO with a change in some
+   critical information and may not be even aware of it, so it may fail to query
+   for the update and operate on deprecated parameters.
    </t><t>
    This document uses a new sequence counter called RCSS to synchronize the
    state in a child node with that of its parent, and recursively with that of
@@ -165,7 +166,7 @@
    <t>
    The Terminology used in this document is consistent with and incorporates
    that described in <xref target="RFC7102"> Terms Used in Routing for Low-Power
-   and Lossy Networks (LLNs).</xref>.
+   and Lossy Networks</xref>.
    </t><t>
    Other terms in use in LLNs are found in <xref target="RFC7228">
    Terminology for Constrained-Node Networks</xref>.
@@ -222,9 +223,9 @@
    protected option that indicates the RCSS of the last change of that option,
    but elides its content, more in <xref target='syopts'/>.
    </t><t>
-   This document modifies the Solicited Information Option to enable the
-   individual query of the protected options by a node that missed a change,
-   more in <xref target='udis'/>.
+   This document modifies the DIS Base Objectto enable the individual query of
+   the protected options by a node that missed a change, more in <xref target=
+   'udis'/>.
    </t>
 </section><!-- end section Updating RFC 6550 -->
 
@@ -238,7 +239,7 @@
    reserved in <xref target="RFC6550"/> to transport the RCSS.
    </t>
        <figure anchor="FigDIO">
-              <name>MOdified DIO Base Object</name>
+              <name>Updated DIO Base Object</name>
        <artwork align="center" name="" type="" alt="">
   0                   1                   2                   3
   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -270,11 +271,49 @@
    </section> <!-- end section Updated DIO Base Object -->
 
 
-   <section  anchor='udis'> <name>Updated Solicited Information Option</name>
+   <section  anchor='udis'> <name>Updated DIS Base Object</name>
+   <t>
+   The DIS Base Object is use by a child to query from a parent the most
+   recent changes in protected options. This specification adds flags to
+   indicate which options are requested and the freshest RCSS to which the
+   querying node was synchronized.
+   </t>
 
-   <!-- Dominique -->
+  <figure anchor="FigDIS"><name>Updated DIS Base Object</name>
+  <artwork align="center" name="" type="" alt="">
+  0                   1                   2
+  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |R|D|P[M|O| Flg | LastSync RCSS |   Option(s)...
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   </artwork>
+   </figure>
 
-   </section> <!-- end section Updated Solicited Information Option -->
+   <t>
+   Updated fields:
+   </t>
+   <dl newline="true" spacing="normal" indent="3">
+          <dt>R</dt>
+          <dd>One Bit, indicates that the RIO is requested</dd>
+          <dt>D</dt>
+          <dd>One Bit, indicates that the DCO is requested</dd>
+          <dt>P</dt>
+          <dd>One Bit, indicates that the PIO(s) is(are) requested</dd>
+          <dt>M</dt>
+          <dd>One Bit, indicates that the MOPex is requested</dd>
+          <dt>O</dt>
+          <dd>One Bit, indicates that the GCO is requested</dd>
+          <dt>Last Synchronized RCSS</dt>
+          <dd>One Byte, indicates the freshest RCSS to which the querier was synchronized</dd>
+   </dl>
+   <t>
+   The DIO message(s) that is (are) sent as a response MUST contain in full all
+   the options that are requested and that were updated since the Last
+   Synchronized RCSS in the DIS Message. The other options SHOULD be added in
+   the abbreviated form.
+   </t>
+
+   </section> <!-- end section Updated DIS Base Object -->
 
    <section  anchor='syopts'> <name>New Abbreviated Option Option</name>
 
@@ -299,7 +338,8 @@
    </t>
    <dl newline="true" spacing="normal" indent="3">
           <dt>Option Type</dt>
-          <dd>One byte indicating "Abbreviated Option", see <xref target="iana"/></dd>
+          <dd>One byte indicating "Abbreviated Option", see <xref target=
+          "ianaopttypetbl"/> in <xref target="ianaopttype"/></dd>
           <dt>Option Length</dt>
           <dd>MUST be set to 2 indicating Option data of 2 bytes</dd>
           <dt>Abbreviated Option</dt>
@@ -467,23 +507,53 @@
    </t>
 </section>
 
-<section numbered="true" toc="default"> <name>IANA Considerations</name>
+<section numbered="true" toc="default">
+<name>IANA Considerations</name>
 
+   <section anchor="ianaopttype" numbered="true" toc="default">
+   <name>New RPL Control Message Option</name>
    <t>
    A new entries is required for the new option of type "Abbreviated Option",
    from the "RPL Control Message Options" space defined for
    <xref target="RFC6550"/>.
    </t>
 
-   <table anchor="iana"><name>New Option Type</name>
+   <table anchor="ianaopttypetbl"><name>New Option Type</name>
    <thead>
-      <tr><td>Value</td><td>Meaning</td><td>Reference</td></tr>
+      <tr><td>Value</td><td>Meaning</td><td>Defining RFC</td></tr>
    </thead><tbody>
       <tr><td>TBD IANA</td><td>Abbreviated Option</td><td>THIS RFC</td></tr>
    </tbody>
 
    </table>
-</section>
+
+    </section><!-- end section  New RPL Control Message Option -->
+
+
+   <section anchor="ianadisflags" numbered="true" toc="default">
+   <name>New DODAG Information Object (DIO) Flags</name>
+   <t>
+   5 new bits are allocated in the Registry for the DODAG Information Object
+   (DIO) Flags defined for <xref target="RFC6550"/>.
+   </t>
+
+   <table anchor="ianadisflagstbl"><name>New DIO Flags</name>
+   <thead>
+      <tr><td>Bit Number</td><td>Capability description</td><td>Defining RFC</td></tr>
+   </thead><tbody>
+      <tr><td>0</td><td>'R' bit "RIO requested"</td><td>THIS RFC</td></tr>
+      <tr><td>1</td><td>'D' bit "DCO requested"</td><td>THIS RFC</td></tr>
+      <tr><td>2</td><td>'P' bit "PIO(s) requested"</td><td>THIS RFC</td></tr>
+      <tr><td>3</td><td>'M' bit "MOPex requested"</td><td>THIS RFC</td></tr>
+      <tr><td>4</td><td>'O' bit "GCO irequested"</td><td>THIS RFC</td></tr>
+   </tbody>
+
+   </table>
+
+    </section><!-- end section  New RPL Control Message Option -->
+
+
+</section><!-- end section  IANA Considerations -->
 
 
 <section><name>Acknowledgments</name>
