@@ -13,7 +13,7 @@
 <?rfc subcompact="no"?>
 <?rfc authorship="yes"?>
 <?rfc tocappendix="yes"?>
-<rfc  xmlns:xi="http://www.w3.org/2001/XInclude" category="std" ipr='trust200902' tocInclude="true"  obsoletes="" updates="6550" consensus="true" submissionType="IETF" xml:lang="en" version="3" docName="draft-thubert-roll-eliding-dio-information-00" >
+<rfc  xmlns:xi="http://www.w3.org/2001/XInclude" category="std" ipr='trust200902' tocInclude="true"  obsoletes="" updates="6550" consensus="true" submissionType="IETF" xml:lang="en" version="3" docName="draft-thubert-roll-eliding-dio-information-02" >
 
 <front>
 
@@ -306,12 +306,6 @@
           <dt>Last Synchronized RCSS</dt>
           <dd>One Byte, indicates the freshest RCSS to which the querier was synchronized</dd>
    </dl>
-   <t>
-   The DIO message(s) that is (are) sent as a response MUST contain in full all
-   the options that are requested and that were updated since the Last
-   Synchronized RCSS in the DIS Message. The other options SHOULD be added in
-   the abbreviated form.
-   </t>
 
    </section> <!-- end section Updated DIS Base Object -->
 
@@ -482,8 +476,7 @@
    option in full even if the RCSS of the DIO is not the freshest across parents,
    as long as the RCSS of the DIO is fresher than the current one for that option.
    </t><t>
-   If current value of the maintained RCSS for an given option is not as fresh
-   or fresher than that advertised in a DIO message, then the child MUST update
+   If the current value of the maintained RCSS for a given option is not fresher or as fresh as that advertised in a DIO message, then the child MUST update
    its state for that option as specified in <xref target="sync"/>.
    </t>
 
@@ -494,10 +487,24 @@
 
 <section  anchor='sync'> <name>Synchronizing Options</name>
 
-   <section  anchor='pullopts'> <name>Pulling Options</name>
    <t>
+   A child can resynchronize any of the protected options to the latest RCSS by
+   sending a DIS Message to a candidate parent that advertises that RCSS in DIO
+   messages. The child MUST set the desired combination of 'R', 'D', 'P', 'M'
+   and 'O' flags to indicate the option(s) that it needs updated. The child MUST
+   signal in the Last Synchronized RCSS field of the DIS the freshest value of
+   RCSS for which it was fully synchronized, or a conventional value of
+   OUT-OF-SYNC-RCSS of 129 if it was never synchronized or is out-of-sync with
+   the parent.
+   </t><t>
+   The DIO message that is sent in response MUST contain in full all the options
+   that are requested and that were updated since the Last Synchronized RCSS in
+   the DIS Message. This means all of the protected options of the child was
+   never synchronized or is out-of-sync with the parent. The other options MUST
+   be added in the abbreviated form. The options MAY be spread over more than
+   one DIO message sent in a quick sequence and the child SHOULD wait a
+   reasonable technology-dependent time before it retries the request.
    </t>
-   </section> <!-- Pulling Options -->
 
 </section> <!-- Synchronizing Options -->
 
@@ -510,28 +517,8 @@
 <section numbered="true" toc="default">
 <name>IANA Considerations</name>
 
-   <section anchor="ianaopttype" numbered="true" toc="default">
-   <name>New RPL Control Message Option</name>
-   <t>
-   A new entries is required for the new option of type "Abbreviated Option",
-   from the "RPL Control Message Options" space defined for
-   <xref target="RFC6550"/>.
-   </t>
-
-   <table anchor="ianaopttypetbl"><name>New Option Type</name>
-   <thead>
-      <tr><td>Value</td><td>Meaning</td><td>Defining RFC</td></tr>
-   </thead><tbody>
-      <tr><td>TBD IANA</td><td>Abbreviated Option</td><td>THIS RFC</td></tr>
-   </tbody>
-
-   </table>
-
-    </section><!-- end section  New RPL Control Message Option -->
-
-
    <section anchor="ianadisflags" numbered="true" toc="default">
-   <name>New DODAG Information Object (DIO) Flags</name>
+   <name>New DODAG Information Object Flags</name>
    <t>
    5 new bits are allocated in the Registry for the DODAG Information Object
    (DIO) Flags defined for <xref target="RFC6550"/>.
@@ -546,6 +533,27 @@
       <tr><td>2</td><td>'P' bit "PIO(s) requested"</td><td>THIS RFC</td></tr>
       <tr><td>3</td><td>'M' bit "MOPex requested"</td><td>THIS RFC</td></tr>
       <tr><td>4</td><td>'O' bit "GCO irequested"</td><td>THIS RFC</td></tr>
+   </tbody>
+
+   </table>
+
+    </section><!-- end section  New RPL Control Message Option -->
+
+
+
+   <section anchor="ianaopttype" numbered="true" toc="default">
+   <name>New RPL Control Message Option</name>
+   <t>
+   A new entry is required for the new option of type "Abbreviated Option",
+   from the "RPL Control Message Options" space defined for
+   <xref target="RFC6550"/>.
+   </t>
+
+   <table anchor="ianaopttypetbl"><name>New Option Type</name>
+   <thead>
+      <tr><td>Code</td><td>Description</td><td>Defining RFC</td></tr>
+   </thead><tbody>
+      <tr><td>TBD IANA</td><td>Abbreviated Option</td><td>THIS RFC</td></tr>
    </tbody>
 
    </table>
