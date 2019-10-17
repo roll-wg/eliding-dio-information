@@ -13,7 +13,7 @@
 <?rfc subcompact="no"?>
 <?rfc authorship="yes"?>
 <?rfc tocappendix="yes"?>
-<rfc  xmlns:xi="http://www.w3.org/2001/XInclude" category="std" ipr='trust200902' tocInclude="true"  obsoletes="" updates="6550" submissionType="IETF" xml:lang="en" version="3" docName="draft-thubert-roll-eliding-dio-information-00" >
+<rfc  xmlns:xi="http://www.w3.org/2001/XInclude" category="std" ipr='trust200902' tocInclude="true"  obsoletes="" updates="6550" consensus="true" submissionType="IETF" xml:lang="en" version="3" docName="draft-thubert-roll-eliding-dio-information-00" >
 
 <front>
 
@@ -67,9 +67,9 @@
    <keyword>Draft</keyword>
    <abstract>
       <t>
-      This document presents a method to elide a group of global RPL options
-      by synchonizing the state associated with each of these options between
-      parent and child using a new sequence counter in DIO messages.
+      This document presents a method to safely elide a group of global RPL
+      options by synchonizing the state associated with each of these options
+      between parent and child using a new sequence counter in DIO messages.
       A child that missed a DIO message with an update of any of those protected
       options detects it by the change of sequence counter and queries the
       update with a DIS Message.
@@ -99,23 +99,59 @@
    and non-routing state such as configuration settings, prefix information, and
    node capabilities.
    </t><t>
-   This non-routing state may be needed to decide whether a node can join a
-   network as a leaf or as a router, and may affect the parent selection.
-   <xref target="RFC6550"/> allows a parent to elide that information in the DIO
-   it sends repeatedly, but if it does so, a newcomer child may have missed the
-   early DIOs that contained the configuration option and live with only partial
-   information. If it is pessimistic, it may query all possible information even
-   when it is not needed. Conversely, a node that slept may have missed a DIO
-   message with a change in some critical information and not be aware of it, so
-   it may fail to query for the update and operate on deprecated parameters.
+   This non-routing state is carried in RPL Messages as options. Some of the DIO
+   options may be needed to decide whether a node can join a network as a leaf
+   or as a router, and may affect the parent selection or the address selection.
+   It is thus critical that each node maintains its state to the freshest and
+   selects parents that are also synchronized to the freshest.
    </t><t>
-   This document uses a new sequence counter to synchronize the state in a child
-   node with that of its parent, and recursively with that of the network.
+   <xref target="RFC6550"/> allows a parent to elide options in the DIO messages
+   that it sends repeatedly, to conserve battery and save bandwidth. But when it
+   does so, a newcomer child that missed DIOs that contained the configuration
+   option may operate on default or partial. If it is pessimistic, it may query
+   all possible the information even when it is not needed. Conversely, a node
+   that slept may have missed a DIO with a change in some critical information
+   and may not be even aware of it, so it may fail to query for the update and
+   operate on deprecated parameters.
+   </t><t>
+   This document uses a new sequence counter called RCSS to synchronize the
+   state in a child node with that of its parent, and recursively with that of
+   the whole network, to the latest setting from the Root.
+   </t><t>
+   The protected options are:
+   </t>
+   <ol>
+      <li>
+      The Route Information Option (RIO) defined in section 6.7.5 of
+      <xref target="RFC6550"/>
+      </li><li>
+      The DODAG Configuration Option (DCO) defined in section 6.7.6 of
+      <xref target="RFC6550"/>
+      </li><li>
+      The Prefix Information Option (PIO) defined in section 6.7.10 of
+      <xref target="RFC6550"/>
+      </li><li>
+      The Extended MOP Option (MOPex) defined in
+      <xref target="I-D.ietf-roll-mopex-cap" format="default"/>
+      </li><li>
+      The Global Capabilities Option (GCO) defined in
+      <xref target="I-D.ietf-roll-mopex-cap" format="default"/>
+      </li>
+   </ol>
+   <t>
+   Any change in those options causes an increment of the RCSS and enables a
+   network-wide synchronization to the new state. If the change impacts the
+   routing substantially, the Root should decide to increment the Version Number
+   at the same time to fully rebuild the DODAG with the new settings of the
+   options. It must be noted that the operation of the Version Number in itself
+   provides no guarantee that the non-routing state is fully resynchronized
+   everywhere unless all the options are present in all the DIO messages.
    </t>
 </section><!-- title="Introduction"-->
 
 <section><name>Terminology</name>
-<section anchor='bcp'> <name>BCP 14</name>
+
+   <section anchor='bcp'> <name>BCP 14</name>
    <t>
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
@@ -123,12 +159,9 @@
    <xref target="RFC2119"/><xref target="RFC8174"/> when, and only when,
    they appear in all capitals, as shown here.
    </t>
-</section> <!-- BCP 14 -->
+   </section> <!-- BCP 14 -->
 
-
-<section anchor='lo'> <name>References</name>
-
-
+   <section anchor='lo'> <name>References</name>
    <t>
    The Terminology used in this document is consistent with and incorporates
    that described in <xref target="RFC7102"> Terms Used in Routing for Low-Power
@@ -156,31 +189,23 @@
    or a RPL router that participates to RPL and advertises its addresses of
    prefixes by itself.
    </t>
-<!--
-<t>
-    Readers are expected to be familiar with all the terms and concepts
-    that are discussed in:
-</t>
-    <ul style="symbols">
-    <li> <xref target="RFC6550">"RPL: IPv6 Routing Protocol for Low-Power and Lossy Networks"</xref>. </li>
-    </ul>
+   </section>	<!-- end section "References" -->
 
--->
-</section>	<!-- end section "References" -->
-<section anchor='gloss'> <name>Glossary</name>
-    <t> This document often uses the following acronyms:
-    </t>
-       <dl>
-       <dt>DODAG</dt><dd>Destination-Oriented Directed Acyclic Graph </dd>
-       <dt>LLN</dt><dd>Low-Power and Lossy Network </dd>
-       <dt>RPI</dt><dd>RPL Packet Information (an Option in the Hop-By_Hop Header)</dd>
-       <dt>RAL</dt><dd>RPL-Aware Leaf </dd>
-       <dt>RAN</dt><dd>RPL-Aware Node, a RPL router or a RPL-Aware Leaf </dd>
-       <dt>RS</dt><dd> Router Solicitation  </dd>
-       <dt>RPL</dt><dd>IPv6 Routing Protocol for LLNs (pronounced ripple) </dd>
-       <dt>RUL</dt><dd>RPL-Unaware Leaf </dd>
-       </dl>
-</section>	<!-- end section "Subset of a 6LoWPAN Glossary" -->
+   <section anchor='gloss'> <name>Glossary</name>
+   <t> This document often uses the following acronyms:
+   </t>
+   <dl>
+      <dt>DODAG</dt><dd>Destination-Oriented Directed Acyclic Graph </dd>
+      <dt>LLN</dt><dd>Low-Power and Lossy Network </dd>
+      <dt>RPI</dt><dd>RPL Packet Information (an Option in the Hop-By_Hop Header)</dd>
+      <dt>RAL</dt><dd>RPL-Aware Leaf </dd>
+      <dt>RAN</dt><dd>RPL-Aware Node, a RPL router or a RPL-Aware Leaf </dd>
+      <dt>RS</dt><dd>Router Solicitation</dd>
+      <dt>RCSS</dt><dd>RPL Configuration State Sequence</dd>
+      <dt>RPL</dt><dd>IPv6 Routing Protocol for LLNs (pronounced ripple) </dd>
+      <dt>RUL</dt><dd>RPL-Unaware Leaf</dd>
+   </dl>
+   </section>	<!-- end section Glossary" -->
 
 </section>	<!-- end section "Terminology" -->
 
@@ -188,27 +213,29 @@
 
 <section><name>Updating RFC 6550</name>
    <t>
-   This document adds a sequence counter called RPL Configuration State Sequence
-   (RCSS) to the DIO message. The RCSS is set by the root and operated as
-   specified in Section 7 of <xref target="RFC6550"/>, more in
-   <xref target='rcss'/>.
+   This document adds a new field called RCSS to the DIO message. The RCSS is
+   a sequence counter set by the Root and operated as specified in Section 7 of
+   <xref target="RFC6550"/>, more in <xref target='rcss'/>.
    </t><t>
-   This document introduces a new RPL Control Message Options called the
-   Abbreviated Option Option (AOO). The AOO is an empty replacement of an
-   existing option that indicates the RCSS of the last change of that option.
+   This document also introduces a new RPL Control Message Option called the
+   Abbreviated Option Option (AOO). The AOO is the compressed replacement of a
+   protected option that indicates the RCSS of the last change of that option,
+   but elides its content, more in <xref target='syopts'/>.
    </t><t>
    This document modifies the Solicited Information Option to enable the
    individual query of the protected options by a node that missed a change,
-   more in <xref target='pullopts'/>.
+   more in <xref target='udis'/>.
    </t>
-   </section><!-- Updating RFC 6550 -->
+</section><!-- end section Updating RFC 6550 -->
 
 
-   <section  anchor='rcss'> <name>New RPL Configuration State Sequence</name>
+<section  anchor='form'> <name>Message Formats</name>
+
+   <section  anchor='udio'> <name>Updated DIO Base Object</name>
    <t>
    The format of the DIO Base Object is defined in section 6.3.1 of
    <xref target="RFC6550"/>. This specification uses a 8th octet that was
-   previously reserved to transport the RCSS.
+   reserved in <xref target="RFC6550"/> to transport the RCSS.
    </t>
        <figure anchor="FigDIO">
               <name>MOdified DIO Base Object</name>
@@ -240,39 +267,19 @@
           <dt>RCSS</dt>
           <dd>One Byte, the RPL Configuration State Sequence </dd>
    </dl>
+   </section> <!-- end section Updated DIO Base Object -->
+
+
+   <section  anchor='udis'> <name>Updated Solicited Information Option</name>
+
+   <!-- Dominique -->
+
+   </section> <!-- end section Updated Solicited Information Option -->
+
+   <section  anchor='syopts'> <name>New Abbreviated Option Option</name>
+
    <t>
-   The RCSS protects network-wide options that are set by the root and that are
-   propagated without a change down the DODAG. The RCSS MUST be incremented when
-   the root sends a DIO where at least one of the protected options is modified.
-   It MUST propagated down without a change together with the options that it
-   protects.
-   </t><t>
-   During the straight part of the lollipop, a second reboot of the root might
-   not be recognized and a same value of the RCSS may appear with new values in
-   the protected options. For that reason the protected options MUST be present
-   in the DIOs during the straight part of the lollipop and the root SHOULD move
-   rapidly away from the straight part once the network has settled by resetting
-   the RCSS to 0, which places the RCSS in the circular region of the lollipop.
-   </t>
-   </section> <!-- New RPL Configuration State Sequence -->
-
-
-   <section  anchor='syopts'> <name>Protected Options</name>
-   <t>The protected options are:
-   </t>
-   <ol>
-
-   <li>The Route Information Option (RIO) defined in section 6.7.5 of <xref target="RFC6550"/></li>
-   <li>The DODAG Configuration Option (DCO) defined in section 6.7.6 of <xref target="RFC6550"/></li>
-   <li>The Prefix Information Option (PIO) defined in section 6.7.10 of <xref target="RFC6550"/></li>
-   <li>The Extended MOP Option (MOPex) defined in
-      <xref target="I-D.ietf-roll-mopex-cap" format="default"/></li>
-   <li>The Global Capabilities Option (GCO) defined in
-      <xref target="I-D.ietf-roll-mopex-cap" format="default"/></li>
-
-   </ol>
-   <t>
-   When a protected option is unchanged from the previous DIOs, the root MAY
+   When a protected option is unchanged from the previous DIOs, the Root MAY
    replace it with its abbreviated version. The abbreviated version of an option
    is transported in a 4-bytes long Abbreviated Option Option (AOO). The AOO
    indicates the RCSS at which the protected option was last changed.
@@ -292,59 +299,175 @@
    </t>
    <dl newline="true" spacing="normal" indent="3">
           <dt>Option Type</dt>
-          <dd>One byte indicating "Abbreviated Option, see <xref target="iana"/></dd>
+          <dd>One byte indicating "Abbreviated Option", see <xref target="iana"/></dd>
           <dt>Option Length</dt>
           <dd>MUST be set to 2 indicating Option data of 2 bytes</dd>
           <dt>Abbreviated Option</dt>
-          <dd>The Option Type of the option being abreviated </dd>
+          <dd>The Option Type of the option being abbreviated </dd>
           <dt>Last Modification RCSS</dt>
           <dd>The RCSS at which the option was last modified</dd>
    </dl>
-   </section> <!-- Protected Options -->
+   </section> <!-- end section New Abbreviated Option Option -->
 
+</section> <!-- Message Formats -->
 
-   <section  anchor='childop'> <name>Child Operation</name>
+<section  anchor='rcss'> <name>RCSS Operation</name>
+
    <t>
-   When a field is modified in one of the protected options in a fashion that
-   may affect the routing or forwarding decision inside the DODAG, the root
-   MUST send a DIO with the protected options. Unchanged options may be
-   abreviated as discussed in <xref target="syopts"/>.
+   Settings and updates to network-wide parameters are initiated by the Root and
+   propagated down the DODAG in RPL Control Message Options in DIO messages. The
+   DIO messages arrive asynchronously via different parents and may confuse a
+   child. The RCSS allows the child to keep synchronized to the latest settings
+   network-wide parameters that are propagated in protected options.
    </t><t>
-   The freshness of the protected options is asserted based on the RCSS.
-   RCSS values are compared as described in section 7.2 of
-   <xref target="RFC6550"/>. When a parent exposes a new RCSS, the child node
-   SHOULD refrain from using that parent until it has resynchronized all the
-   protected fields to the latest. When it is resynchronized, the child SHOULD
-   refrain from using other parents that expose an older RCSS.
+   The RCSS is a sequence number that is operated as specified in section 7.2 of
+   <xref target="RFC6550"/>. The scope of an RCSS is one DODAG within one RPL
+   Instance. The RCSS applies to a DIO Message and a same value of the RCSS can
+   be used in DIO messages that are sent consecutively with no change in the
+   protected options.
    </t><t>
-   A child MUST store the content of all the protected options and keep track of
-   the RCSS of the DIO where each of these option was last seen in a
-   non-abbreviated version.
-   If that RCSS is fresher than the Last Modification RCSS in the abbreviated
-   version of the option then the child is up-to-date for that option.
-   If a protected option elided in a DIO and not abbreviated, and the child has
-   a stored RCSS value for that option that is lower than the RCSS in the DIO,
-   then the child MUST query that option from the parent to ensure that is has
-   the latest. This is done with a DIS message as indicated in
-   <xref target="pullopts"/>.
+   The Root of the DODAG is autoritative to set and update the RCSS and the
+   options that it protects. The RCSS and the protected options are propagated
+   together down the DODAG without a change, more in <xref target='updcss'/>.
+   </t><t>
+   The RCSS allows a child node to recognize the fresher DIO Message(s) as
+   received from one or more advertising parents and to use only parents with a
+   consistent state of network-wide parameters, more in
+   <xref target='freshrcss'/>.
+   </t><t>
+   By extension, the RCSS is also defined for each protected option. A child
+   associates an option with the values of the RCSS indicated in DIO Messages in
+   which the option is advertised and uses it to assess the relative freshness
+   of different versions of an option, more in <xref target='optrcss'/>.
+   </t><t>
+   Unchanged options may be sent in full, elided, or in the abbreviated form
+   specified in <xref target="syopts"/>. Eliding an option is NOT RECOMMENDED as
+   it may cause multiple children to resynchronize the option even if it was not
+   changed.
+   </t><t>
+   If the link MTU does not permit to send a single DIO message with all the
+   options packaged then the options may be spread over multiple consecutive
+   DIO messages with the same RCSS that are sent in a rapid sequence.
    </t>
-   </section> <!-- Child Operation -->
 
+   <section  anchor='updcss'> <name>Updating the RCSS</name>
+   <t>
+   The RCSS is incremented by the Root using a lollipop technique as specified
+   in section 7.2 of <xref target="RFC6550"/>. RCSS values are comparable if
+   they are within a window of comparison of SEQUENCE_WINDOW increments or one
+   indicates a reboot.
+   </t><t>
+   A reboot of the Root is detected when the RCSS moves from the circular to the
+   straight part of the lollipop. In order to maximize the chances of detection,
+   the straight part should be kept very short with a RECOMMENDED initialization
+   at 252 or above.
+   </t><t>
+   During the straight part of the lollipop, a second reboot of the Root might
+   not be recognized and a same value of the RCSS may reappear with different
+   settings in the protected options. For that reason the protected options MUST
+   be provided in full with each increment on the RCSS during the straight part
+   of the lollipop.
+   </t><t>
+   When a field is modified in one of the protected options, the Root MUST send
+   a DIO with an incremented RCSS and the modified protected option(s) in full.
+   The Root MAY also update the Version Number to form a new DODAG altogether.
+   </t><t>
+   The Root SHOULD jump rapidly away from the straight part once the network has
+   sufficiently settled by resetting the RCSS to 0, which places the RCSS in the
+   circular region of the lollipop, where the protected options MAY be elided or
+   abbreviated.
+   </t>
+    </section> <!-- Updating the RCSS -->
+
+   <section  anchor='freshrcss'> <name>RCSS Freshness and Parent selection</name>
+   <t>
+   A child node maintains the freshest RCSS received from its parents in each of
+   the RPL Instances that it participates to, and uses that RCSS for its own DIO
+   messages.
+   </t><t>
+   A child and a candidate parent are out-of-sync when the RCSS values that they
+   maintain for a RPL Instance are not comparable. A child MUST NOT use a parent
+   that is out-of-sync unless no other parent is available, in which case it MAY
+   align its RCSS and resynchronize to that parent.
+   </t><t>
+   When a child receives from a candidate parent a DIO with an RCSS that is
+   fresher than the one it is using, the child MUST synchronize the state
+   relative to the protected options with that parent. The child node MUST
+   refrain from using that parent and the new state including the RCSS, until
+   it has synchronized all of the protected options to that RCSS. When it is
+   fully synchronized, the child may then use that parent and the new RCSS.
+   </t><t>
+   Using a back-level parent may cause packets to be dropped, misunderstood or
+   misrouted. The child SHOULD refrain from using a parent that exposes an older
+   RCSS if the change causes an incompatibility issue.
+   </t>
+   </section> <!-- Freshness and Parent selection -->
+
+   <section  anchor='optrcss'> <name>RCSS of an Option</name>
+   <t>
+   By extension, the RCSS of an option is maintained by a child as the freshest
+   RCSS indicated by a DIO message from a candidate parent in which the option
+   was present in the abbreviated form or in full. A child maintains a state for
+   the freshest RCSS received for each of the protected options and synchronizes
+   its state for each option to the freshest RCSS of that option.
+   </t><t>
+   When a child receives a DIO from a candidate parent, for each option:
+   </t>
+   <dl>
+      <dt>If the Option is advertised in the abbreviated form</dt><dd>then the
+      RCSS that the DIO advertises for the option is the Last Modification RCSS
+      of the AOO, else</dd>
+      <dt>If the Option is advertised in full</dt><dd>then the RCSS that the DIO
+      advertises for the option is the RCSS of the DIO, else</dd>
+      <dt>If the Option is elided</dt><dd>then the RCSS is unspecified but it is
+      at most as fresh as the RCSS of the DIO, and the RCSS of the DIO is
+      assumed for the comparison</dd>
+   </dl>
+   <t>
+   This means that if an Option is advertised in both the abbreviated form and
+   in full in a same DIO message then the RCSS in the AOO has precedence.
+   </t><t>
+   To keep the RCSS comparable for each option, the RCSS of an option must
+   lazily progress along with the global RCSS even if there was no change in the
+   options. Each parent including the Root MUST advertise a new RCSS for each of
+   the protected options at least once within a sliding window of
+   SEQUENCE_WINDOW increments.
+   </t><t>
+   When an option was not changed for a new RCSS, one parent may advertise it in
+   the abbreviated form while another sends the option in full only, e.g., in
+   response to a DIS message. A fresher RCSS indicates that the option is either
+   the same or carries a more recent update than the one with an older RCSS.
+   </t><t>
+   The RCSS of an option may be obtained from a DIO message that carries the
+   option in full even if the RCSS of the DIO is not the freshest across parents,
+   as long as the RCSS of the DIO is fresher than the current one for that option.
+   </t><t>
+   If current value of the maintained RCSS for an given option is not as fresh
+   or fresher than that advertised in a DIO message, then the child MUST update
+   its state for that option as specified in <xref target="sync"/>.
+   </t>
+
+
+   </section> <!--end section RCSS of an Option -->
+
+</section> <!-- end section RCSS Operation -->
+
+<section  anchor='sync'> <name>Synchronizing Options</name>
 
    <section  anchor='pullopts'> <name>Pulling Options</name>
    <t>
    </t>
    </section> <!-- Pulling Options -->
 
+</section> <!-- Synchronizing Options -->
 
-
-   <section anchor="SecurityConsiderations" numbered="true" toc="default">
+<section anchor="SecurityConsiderations" numbered="true" toc="default">
        <name>Security Considerations</name>
    <t>TBD
    </t>
-   </section>
+</section>
 
-   <section numbered="true" toc="default"> <name>IANA Considerations</name>
+<section numbered="true" toc="default"> <name>IANA Considerations</name>
 
    <t>
    A new entries is required for the new option of type "Abbreviated Option",
@@ -360,20 +483,16 @@
    </tbody>
 
    </table>
-   </section>
-
-   <section anchor='sec'><name>Security Considerations</name>
-      <t>TBD
-      </t>
-   </section>
+</section>
 
 
-
-	<section><name>Acknowledgments</name>
+<section><name>Acknowledgments</name>
 		<t>
 
    		</t>
-	</section><!-- ack -->
+</section><!-- ack -->
+
+
 </middle>
 
 
@@ -384,13 +503,13 @@
    <displayreference   target="RFC6550"                              to="RPL"/>
 
    <references><name>Normative References</name>
-      <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml'/> <!-- BCP 14 -->
-      <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml'/> <!-- BCP 14 update -->
-      <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6550.xml'/> <!-- RPL -->
-      <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7228.xml'/> <!-- Terminology for Constrained-Node Networks -->
-      <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7102.xml'/> <!-- Terms Used in Routing for Low-Power and Lossy Networks -->
-      <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-roll-mopex-cap.xml'/>
-      <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-roll-useofrplinfo.xml'/>
+      <xi:include href='https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml'/> <!-- BCP 14 -->
+      <xi:include href='https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml'/> <!-- BCP 14 update -->
+      <xi:include href='https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6550.xml'/> <!-- RPL -->
+      <xi:include href='https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7228.xml'/> <!-- Terminology for Constrained-Node Networks -->
+      <xi:include href='https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7102.xml'/> <!-- Terms Used in Routing for Low-Power and Lossy Networks -->
+      <xi:include href='https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-roll-mopex-cap.xml'/>
+      <xi:include href='https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-roll-useofrplinfo.xml'/>
    </references>
    <references><name>Informative References</name>
 

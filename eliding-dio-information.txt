@@ -6,9 +6,9 @@ ROLL                                                     P. Thubert, Ed.
 Internet-Draft                                             Cisco Systems
 Updates: 6550 (if approved)                                   D. Barthel
 Intended status: Standards Track                             Orange Labs
-Expires: 17 April 2020                                       R.A. Jadhav
+Expires: 19 April 2020                                       R.A. Jadhav
                                                              Huawei Tech
-                                                         15 October 2019
+                                                         17 October 2019
 
 
                   Eliding and Querying RPL Information
@@ -16,7 +16,7 @@ Expires: 17 April 2020                                       R.A. Jadhav
 
 Abstract
 
-   This document presents a method to elide a group of global RPL
+   This document presents a method to safely elide a group of global RPL
    options by synchonizing the state associated with each of these
    options between parent and child using a new sequence counter in DIO
    messages.  A child that missed a DIO message with an update of any of
@@ -38,7 +38,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 17 April 2020.
+   This Internet-Draft will expire on 19 April 2020.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Thubert, et al.           Expires 17 April 2020                 [Page 1]
+Thubert, et al.           Expires 19 April 2020                 [Page 1]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
@@ -65,22 +65,27 @@ Internet-Draft              Eliding RPL Info                October 2019
 Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
-   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
-     2.1.  BCP 14  . . . . . . . . . . . . . . . . . . . . . . . . .   3
-     2.2.  References  . . . . . . . . . . . . . . . . . . . . . . .   3
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   4
+     2.1.  BCP 14  . . . . . . . . . . . . . . . . . . . . . . . . .   4
+     2.2.  References  . . . . . . . . . . . . . . . . . . . . . . .   4
      2.3.  Glossary  . . . . . . . . . . . . . . . . . . . . . . . .   4
-   3.  Updating RFC 6550 . . . . . . . . . . . . . . . . . . . . . .   4
-   4.  New RPL Configuration State Sequence  . . . . . . . . . . . .   4
-   5.  Protected Options . . . . . . . . . . . . . . . . . . . . . .   5
-   6.  Child Operation . . . . . . . . . . . . . . . . . . . . . . .   6
-   7.  Pulling Options . . . . . . . . . . . . . . . . . . . . . . .   7
-   8.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
-   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
-   10. Security Considerations . . . . . . . . . . . . . . . . . . .   7
-   11. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   7
-   12. Normative References  . . . . . . . . . . . . . . . . . . . .   7
-   13. Informative References  . . . . . . . . . . . . . . . . . . .   8
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   8
+   3.  Updating RFC 6550 . . . . . . . . . . . . . . . . . . . . . .   5
+   4.  Message Formats . . . . . . . . . . . . . . . . . . . . . . .   5
+     4.1.  Updated DIO Base Object . . . . . . . . . . . . . . . . .   5
+     4.2.  Updated Solicited Information Option  . . . . . . . . . .   6
+     4.3.  New Abbreviated Option Option . . . . . . . . . . . . . .   6
+   5.  RCSS Operation  . . . . . . . . . . . . . . . . . . . . . . .   7
+     5.1.  Updating the RCSS . . . . . . . . . . . . . . . . . . . .   8
+     5.2.  RCSS Freshness and Parent selection . . . . . . . . . . .   8
+     5.3.  RCSS of an Option . . . . . . . . . . . . . . . . . . . .   9
+   6.  Synchronizing Options . . . . . . . . . . . . . . . . . . . .  10
+     6.1.  Pulling Options . . . . . . . . . . . . . . . . . . . . .  10
+   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  10
+   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  10
+   9.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  10
+   10. Normative References  . . . . . . . . . . . . . . . . . . . .  10
+   11. Informative References  . . . . . . . . . . . . . . . . . . .  11
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  11
 
 1.  Introduction
 
@@ -101,31 +106,69 @@ Table of Contents
    nodes most of the time in a Low-Power Lossy Network (LLN) where the
    quality of the links and the cost of communications does not permit
    to maintain a permanent synchronization.  This principle was applied
-   to both the routing information and non-routing state such as
-   configuration settings, prefix information, and node capabilities.
-
-   This non-routing state may be needed to decide whether a node can
-   join a network as a leaf or as a router, and may affect the parent
 
 
 
-Thubert, et al.           Expires 17 April 2020                 [Page 2]
+Thubert, et al.           Expires 19 April 2020                 [Page 2]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
 
-   selection.  [RPL] allows a parent to elide that information in the
-   DIO it sends repeatedly, but if it does so, a newcomer child may have
-   missed the early DIOs that contained the configuration option and
-   live with only partial information.  If it is pessimistic, it may
-   query all possible information even when it is not needed.
-   Conversely, a node that slept may have missed a DIO message with a
-   change in some critical information and not be aware of it, so it may
-   fail to query for the update and operate on deprecated parameters.
+   to both the routing information and non-routing state such as
+   configuration settings, prefix information, and node capabilities.
 
-   This document uses a new sequence counter to synchronize the state in
-   a child node with that of its parent, and recursively with that of
-   the network.
+   This non-routing state is carried in RPL Messages as options.  Some
+   of the DIO options may be needed to decide whether a node can join a
+   network as a leaf or as a router, and may affect the parent selection
+   or the address selection.  It is thus critical that each node
+   maintains its state to the freshest and selects parents that are also
+   synchronized to the freshest.
+
+   [RPL] allows a parent to elide options in the DIO messages that it
+   sends repeatedly, to conserve battery and save bandwidth.  But when
+   it does so, a newcomer child that missed DIOs that contained the
+   configuration option may operate on default or partial.  If it is
+   pessimistic, it may query all possible the information even when it
+   is not needed.  Conversely, a node that slept may have missed a DIO
+   with a change in some critical information and may not be even aware
+   of it, so it may fail to query for the update and operate on
+   deprecated parameters.
+
+   This document uses a new sequence counter called RCSS to synchronize
+   the state in a child node with that of its parent, and recursively
+   with that of the whole network, to the latest setting from the Root.
+
+   The protected options are:
+
+   1.  The Route Information Option (RIO) defined in section 6.7.5 of
+       [RPL]
+
+   2.  The DODAG Configuration Option (DCO) defined in section 6.7.6 of
+       [RPL]
+
+   3.  The Prefix Information Option (PIO) defined in section 6.7.10 of
+       [RPL]
+
+   4.  The Extended MOP Option (MOPex) defined in [MOPEX-CAP]
+
+   5.  The Global Capabilities Option (GCO) defined in [MOPEX-CAP]
+
+   Any change in those options causes an increment of the RCSS and
+   enables a network-wide synchronization to the new state.  If the
+   change impacts the routing substantially, the Root should decide to
+   increment the Version Number at the same time to fully rebuild the
+   DODAG with the new settings of the options.  It must be noted that
+   the operation of the Version Number in itself provides no guarantee
+   that the non-routing state is fully resynchronized everywhere unless
+   all the options are present in all the DIO messages.
+
+
+
+
+Thubert, et al.           Expires 19 April 2020                 [Page 3]
+
+Internet-Draft              Eliding RPL Info                October 2019
+
 
 2.  Terminology
 
@@ -162,14 +205,6 @@ Internet-Draft              Eliding RPL Info                October 2019
    a RPL router (without necessarily knowing it) as 6LR and depends on
    that router to obtain reachability for its addresses inside the RPL
    domain.  On the contrary, the term RPL-Aware Node (RAN) is used to
-
-
-
-Thubert, et al.           Expires 17 April 2020                 [Page 3]
-
-Internet-Draft              Eliding RPL Info                October 2019
-
-
    refer to a RAL or a RPL router that participates to RPL and
    advertises its addresses of prefixes by itself.
 
@@ -183,11 +218,21 @@ Internet-Draft              Eliding RPL Info                October 2019
 
    RPI  RPL Packet Information (an Option in the Hop-By_Hop Header)
 
+
+
+
+Thubert, et al.           Expires 19 April 2020                 [Page 4]
+
+Internet-Draft              Eliding RPL Info                October 2019
+
+
    RAL  RPL-Aware Leaf
 
    RAN  RPL-Aware Node, a RPL router or a RPL-Aware Leaf
 
    RS  Router Solicitation
+
+   RCSS  RPL Configuration State Sequence
 
    RPL  IPv6 Routing Protocol for LLNs (pronounced ripple)
 
@@ -195,24 +240,26 @@ Internet-Draft              Eliding RPL Info                October 2019
 
 3.  Updating RFC 6550
 
-   This document adds a sequence counter called RPL Configuration State
-   Sequence (RCSS) to the DIO message.  The RCSS is set by the root and
-   operated as specified in Section 7 of [RPL], more in Section 4.
+   This document adds a new field called RCSS to the DIO message.  The
+   RCSS is a sequence counter set by the Root and operated as specified
+   in Section 7 of [RPL], more in Section 5.
 
-   This document introduces a new RPL Control Message Options called the
-   Abbreviated Option Option (AOO).  The AOO is an empty replacement of
-   an existing option that indicates the RCSS of the last change of that
-   option.
+   This document also introduces a new RPL Control Message Option called
+   the Abbreviated Option Option (AOO).  The AOO is the compressed
+   replacement of a protected option that indicates the RCSS of the last
+   change of that option, but elides its content, more in Section 4.3.
 
    This document modifies the Solicited Information Option to enable the
    individual query of the protected options by a node that missed a
-   change, more in Section 7.
+   change, more in Section 4.2.
 
-4.  New RPL Configuration State Sequence
+4.  Message Formats
+
+4.1.  Updated DIO Base Object
 
    The format of the DIO Base Object is defined in section 6.3.1 of
-   [RPL].  This specification uses a 8th octet that was previously
-   reserved to transport the RCSS.
+   [RPL].  This specification uses a 8th octet that was reserved in
+   [RPL] to transport the RCSS.
 
 
 
@@ -221,7 +268,16 @@ Internet-Draft              Eliding RPL Info                October 2019
 
 
 
-Thubert, et al.           Expires 17 April 2020                 [Page 4]
+
+
+
+
+
+
+
+
+
+Thubert, et al.           Expires 19 April 2020                 [Page 5]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
@@ -251,45 +307,11 @@ Internet-Draft              Eliding RPL Info                October 2019
    RCSS
       One Byte, the RPL Configuration State Sequence
 
-   The RCSS protects network-wide options that are set by the root and
-   that are propagated without a change down the DODAG.  The RCSS MUST
-   be incremented when the root sends a DIO where at least one of the
-   protected options is modified.  It MUST propagated down without a
-   change together with the options that it protects.
+4.2.  Updated Solicited Information Option
 
-   During the straight part of the lollipop, a second reboot of the root
-   might not be recognized and a same value of the RCSS may appear with
-   new values in the protected options.  For that reason the protected
-   options MUST be present in the DIOs during the straight part of the
-   lollipop and the root SHOULD move rapidly away from the straight part
-   once the network has settled by resetting the RCSS to 0, which places
-   the RCSS in the circular region of the lollipop.
+4.3.  New Abbreviated Option Option
 
-5.  Protected Options
-
-   The protected options are:
-
-   1.  The Route Information Option (RIO) defined in section 6.7.5 of
-       [RPL]
-
-   2.  The DODAG Configuration Option (DCO) defined in section 6.7.6 of
-       [RPL]
-
-
-
-Thubert, et al.           Expires 17 April 2020                 [Page 5]
-
-Internet-Draft              Eliding RPL Info                October 2019
-
-
-   3.  The Prefix Information Option (PIO) defined in section 6.7.10 of
-       [RPL]
-
-   4.  The Extended MOP Option (MOPex) defined in [MOPEX-CAP]
-
-   5.  The Global Capabilities Option (GCO) defined in [MOPEX-CAP]
-
-   When a protected option is unchanged from the previous DIOs, the root
+   When a protected option is unchanged from the previous DIOs, the Root
    MAY replace it with its abbreviated version.  The abbreviated version
    of an option is transported in a 4-bytes long Abbreviated Option
    Option (AOO).  The AOO indicates the RCSS at which the protected
@@ -306,56 +328,202 @@ Internet-Draft              Eliding RPL Info                October 2019
    Option fields:
 
    Option Type
-      One byte indicating "Abbreviated Option, see Table 1
+      One byte indicating "Abbreviated Option", see Table 1
+
+
+
+
+Thubert, et al.           Expires 19 April 2020                 [Page 6]
+
+Internet-Draft              Eliding RPL Info                October 2019
+
 
    Option Length
       MUST be set to 2 indicating Option data of 2 bytes
 
    Abbreviated Option
-      The Option Type of the option being abreviated
+      The Option Type of the option being abbreviated
 
    Last Modification RCSS
       The RCSS at which the option was last modified
 
-6.  Child Operation
+5.  RCSS Operation
 
-   When a field is modified in one of the protected options in a fashion
-   that may affect the routing or forwarding decision inside the DODAG,
-   the root MUST send a DIO with the protected options.  Unchanged
-   options may be abreviated as discussed in Section 5.
+   Settings and updates to network-wide parameters are initiated by the
+   Root and propagated down the DODAG in RPL Control Message Options in
+   DIO messages.  The DIO messages arrive asynchronously via different
+   parents and may confuse a child.  The RCSS allows the child to keep
+   synchronized to the latest settings network-wide parameters that are
+   propagated in protected options.
 
-   The freshness of the protected options is asserted based on the RCSS.
-   RCSS values are compared as described in section 7.2 of [RPL].  When
-   a parent exposes a new RCSS, the child node SHOULD refrain from using
-   that parent until it has resynchronized all the protected fields to
-   the latest.  When it is resynchronized, the child SHOULD refrain from
-   using other parents that expose an older RCSS.
+   The RCSS is a sequence number that is operated as specified in
+   section 7.2 of [RPL].  The scope of an RCSS is one DODAG within one
+   RPL Instance.  The RCSS applies to a DIO Message and a same value of
+   the RCSS can be used in DIO messages that are sent consecutively with
+   no change in the protected options.
+
+   The Root of the DODAG is autoritative to set and update the RCSS and
+   the options that it protects.  The RCSS and the protected options are
+   propagated together down the DODAG without a change, more in
+   Section 5.1.
+
+   The RCSS allows a child node to recognize the fresher DIO Message(s)
+   as received from one or more advertising parents and to use only
+   parents with a consistent state of network-wide parameters, more in
+   Section 5.2.
+
+   By extension, the RCSS is also defined for each protected option.  A
+   child associates an option with the values of the RCSS indicated in
+   DIO Messages in which the option is advertised and uses it to assess
+   the relative freshness of different versions of an option, more in
+   Section 5.3.
+
+   Unchanged options may be sent in full, elided, or in the abbreviated
+   form specified in Section 4.3.  Eliding an option is NOT RECOMMENDED
+   as it may cause multiple children to resynchronize the option even if
+   it was not changed.
+
+   If the link MTU does not permit to send a single DIO message with all
+   the options packaged then the options may be spread over multiple
 
 
 
-Thubert, et al.           Expires 17 April 2020                 [Page 6]
+
+Thubert, et al.           Expires 19 April 2020                 [Page 7]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
 
-   A child MUST store the content of all the protected options and keep
-   track of the RCSS of the DIO where each of these option was last seen
-   in a non-abbreviated version.  If that RCSS is fresher than the Last
-   Modification RCSS in the abbreviated version of the option then the
-   child is up-to-date for that option.  If a protected option elided in
-   a DIO and not abbreviated, and the child has a stored RCSS value for
-   that option that is lower than the RCSS in the DIO, then the child
-   MUST query that option from the parent to ensure that is has the
-   latest.  This is done with a DIS message as indicated in Section 7.
+   consecutive DIO messages with the same RCSS that are sent in a rapid
+   sequence.
 
-7.  Pulling Options
+5.1.  Updating the RCSS
+
+   The RCSS is incremented by the Root using a lollipop technique as
+   specified in section 7.2 of [RPL].  RCSS values are comparable if
+   they are within a window of comparison of SEQUENCE_WINDOW increments
+   or one indicates a reboot.
+
+   A reboot of the Root is detected when the RCSS moves from the
+   circular to the straight part of the lollipop.  In order to maximize
+   the chances of detection, the straight part should be kept very short
+   with a RECOMMENDED initialization at 252 or above.
+
+   During the straight part of the lollipop, a second reboot of the Root
+   might not be recognized and a same value of the RCSS may reappear
+   with different settings in the protected options.  For that reason
+   the protected options MUST be provided in full with each increment on
+   the RCSS during the straight part of the lollipop.
+
+   When a field is modified in one of the protected options, the Root
+   MUST send a DIO with an incremented RCSS and the modified protected
+   option(s) in full.  The Root MAY also update the Version Number to
+   form a new DODAG altogether.
+
+   The Root SHOULD jump rapidly away from the straight part once the
+   network has sufficiently settled by resetting the RCSS to 0, which
+   places the RCSS in the circular region of the lollipop, where the
+   protected options MAY be elided or abbreviated.
+
+5.2.  RCSS Freshness and Parent selection
+
+   A child node maintains the freshest RCSS received from its parents in
+   each of the RPL Instances that it participates to, and uses that RCSS
+   for its own DIO messages.
+
+   A child and a candidate parent are out-of-sync when the RCSS values
+   that they maintain for a RPL Instance are not comparable.  A child
+   MUST NOT use a parent that is out-of-sync unless no other parent is
+   available, in which case it MAY align its RCSS and resynchronize to
+   that parent.
+
+   When a child receives from a candidate parent a DIO with an RCSS that
+   is fresher than the one it is using, the child MUST synchronize the
+   state relative to the protected options with that parent.  The child
+   node MUST refrain from using that parent and the new state including
+   the RCSS, until it has synchronized all of the protected options to
 
 
-8.  Security Considerations
+
+Thubert, et al.           Expires 19 April 2020                 [Page 8]
+
+Internet-Draft              Eliding RPL Info                October 2019
+
+
+   that RCSS.  When it is fully synchronized, the child may then use
+   that parent and the new RCSS.
+
+   Using a back-level parent may cause packets to be dropped,
+   misunderstood or misrouted.  The child SHOULD refrain from using a
+   parent that exposes an older RCSS if the change causes an
+   incompatibility issue.
+
+5.3.  RCSS of an Option
+
+   By extension, the RCSS of an option is maintained by a child as the
+   freshest RCSS indicated by a DIO message from a candidate parent in
+   which the option was present in the abbreviated form or in full.  A
+   child maintains a state for the freshest RCSS received for each of
+   the protected options and synchronizes its state for each option to
+   the freshest RCSS of that option.
+
+   When a child receives a DIO from a candidate parent, for each option:
+
+   If the Option is advertised in the abbreviated form  then the RCSS
+      that the DIO advertises for the option is the Last Modification
+      RCSS of the AOO, else
+
+   If the Option is advertised in full  then the RCSS that the DIO
+      advertises for the option is the RCSS of the DIO, else
+
+   If the Option is elided  then the RCSS is unspecified but it is at
+      most as fresh as the RCSS of the DIO, and the RCSS of the DIO is
+      assumed for the comparison
+
+   This means that if an Option is advertised in both the abbreviated
+   form and in full in a same DIO message then the RCSS in the AOO has
+   precedence.
+
+   To keep the RCSS comparable for each option, the RCSS of an option
+   must lazily progress along with the global RCSS even if there was no
+   change in the options.  Each parent including the Root MUST advertise
+   a new RCSS for each of the protected options at least once within a
+   sliding window of SEQUENCE_WINDOW increments.
+
+   When an option was not changed for a new RCSS, one parent may
+   advertise it in the abbreviated form while another sends the option
+   in full only, e.g., in response to a DIS message.  A fresher RCSS
+   indicates that the option is either the same or carries a more recent
+   update than the one with an older RCSS.
+
+   The RCSS of an option may be obtained from a DIO message that carries
+   the option in full even if the RCSS of the DIO is not the freshest
+
+
+
+Thubert, et al.           Expires 19 April 2020                 [Page 9]
+
+Internet-Draft              Eliding RPL Info                October 2019
+
+
+   across parents, as long as the RCSS of the DIO is fresher than the
+   current one for that option.
+
+   If current value of the maintained RCSS for an given option is not as
+   fresh or fresher than that advertised in a DIO message, then the
+   child MUST update its state for that option as specified in
+   Section 6.
+
+6.  Synchronizing Options
+
+6.1.  Pulling Options
+
+
+7.  Security Considerations
 
    TBD
 
-9.  IANA Considerations
+8.  IANA Considerations
 
    A new entries is required for the new option of type "Abbreviated
    Option", from the "RPL Control Message Options" space defined for
@@ -369,14 +537,10 @@ Internet-Draft              Eliding RPL Info                October 2019
 
                           Table 1: New Option Type
 
-10.  Security Considerations
-
-   TBD
-
-11.  Acknowledgments
+9.  Acknowledgments
 
 
-12.  Normative References
+10.  Normative References
 
    [MOPEX-CAP]
               Jadhav, R. and P. Thubert, "Mode of Operation extension
@@ -385,19 +549,18 @@ Internet-Draft              Eliding RPL Info                October 2019
               <https://tools.ietf.org/html/draft-ietf-roll-mopex-cap-
               00>.
 
-
-
-
-
-Thubert, et al.           Expires 17 April 2020                 [Page 7]
-
-Internet-Draft              Eliding RPL Info                October 2019
-
-
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/info/rfc2119>.
+
+
+
+
+Thubert, et al.           Expires 19 April 2020                [Page 10]
+
+Internet-Draft              Eliding RPL Info                October 2019
+
 
    [RFC7102]  Vasseur, JP., "Terms Used in Routing for Low-Power and
               Lossy Networks", RFC 7102, DOI 10.17487/RFC7102, January
@@ -428,7 +591,7 @@ Internet-Draft              Eliding RPL Info                October 2019
               <https://tools.ietf.org/html/draft-ietf-roll-useofrplinfo-
               31>.
 
-13.  Informative References
+11.  Informative References
 
 Authors' Addresses
 
@@ -442,18 +605,19 @@ Authors' Addresses
    Email: pthubert@cisco.com
 
 
-
-
-
-Thubert, et al.           Expires 17 April 2020                 [Page 8]
-
-Internet-Draft              Eliding RPL Info                October 2019
-
-
    Dominique Barthel
    Orange Labs
    28 chemin du Vieux Chêne
    38243 Meylan
+
+
+
+
+Thubert, et al.           Expires 19 April 2020                [Page 11]
+
+Internet-Draft              Eliding RPL Info                October 2019
+
+
    France
 
    Email: dominique.barthel@orange.com
@@ -501,4 +665,8 @@ Internet-Draft              Eliding RPL Info                October 2019
 
 
 
-Thubert, et al.           Expires 17 April 2020                 [Page 9]
+
+
+
+
+Thubert, et al.           Expires 19 April 2020                [Page 12]
