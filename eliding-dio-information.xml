@@ -417,7 +417,7 @@
    <t>
    A child node maintains the freshest RCSS received from its parents in each of
    the RPL Instances that it participates to, and uses that RCSS for its own DIO
-   messages.
+   messages once it has all the protected options synchronized to it.
    </t><t>
    A child and a candidate parent are out-of-sync when the RCSS values that they
    maintain for a RPL Instance are not comparable. A child MUST NOT use a parent
