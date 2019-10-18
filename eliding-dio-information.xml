@@ -312,10 +312,10 @@
    <section  anchor='syopts'> <name>New Abbreviated Option Option</name>
 
    <t>
-   When a protected option is unchanged from the previous DIOs, the Root MAY
-   replace it with its abbreviated version. The abbreviated version of an option
-   is transported in a 4-bytes long Abbreviated Option Option (AOO). The AOO
-   indicates the RCSS at which the protected option was last changed.
+   The abbreviated version of an option is a replacement for any option. It does
+   not advertise the content of the option but indicates the sender's value for
+   the RCSS of that option. It is transported in a 4-bytes long Abbreviated
+   Option Option (AOO) with a format as below:
    </t>
        <figure anchor="FigABB">
               <name>Abbreviated Option Option Format</name>
@@ -375,10 +375,10 @@
    of different versions of an option, more in <xref target='optrcss'/>.
    </t><t>
    Unchanged options may be sent in full, elided, or in the abbreviated form
-   specified in <xref target="syopts"/>. Eliding an option is NOT RECOMMENDED as
-   it may cause multiple children to resynchronize the option even if it was not
-   changed.
-   </t><t>
+   specified in <xref target="syopts"/>. Which form to use depends on the RCSS,
+   more in <xref target='optrcss'/>
+   </t>
+   <t>
    If the link MTU does not permit to send a single DIO message with all the
    options packaged then the options may be spread over multiple consecutive
    DIO messages with the same RCSS that are sent in a rapid sequence.
@@ -437,14 +437,36 @@
    </t>
    </section> <!-- Freshness and Parent selection -->
 
+
    <section  anchor='optrcss'> <name>RCSS of an Option</name>
    <t>
-   By extension, the RCSS of an option is maintained by a child as the freshest
-   RCSS indicated by a DIO message from a candidate parent in which the option
-   was present in the abbreviated form or in full. A child maintains a state for
-   the freshest RCSS received for each of the protected options and synchronizes
-   its state for each option to the freshest RCSS of that option.
+   By extension, the RCSS of an option is maintained by all nodes and is defined
+   for all but the root as the freshest RCSS indicated by a DIO message from a
+   candidate parent in which the option was present, in the abbreviated form or
+   in full. A child maintains a state for the RCSS of each of the protected
+   options and synchronizes its state for the options by comparing that RCSS
+   with the one found in new DIO messages for the option.
    </t><t>
+   Protected options may be sent in full, elided, or in the abbreviated form.
+   Which form to use depends on the RCSS of the option that a parent maintains:
+   </t>
+   <ul>
+      <li>
+      A parent MAY use either form when the RCSS is not changed from a previous
+      DIO; eliding options is PREFERRED in stable conditions to save resources.
+      </li><li>
+      When a protected option is updated, the RCSS is mechanically incremented,
+      and the new option MUST be sent in full on the first DIO that advertises
+      that new RCSS and the corresponding AOO SHOULD NOT be added.
+      </li><li>
+      When the RCSS is updated but a protected option is unchanged, the parent
+      SHOULD NOT fully elide the option as it may cause multiple children to
+      resynchronize it to no avail. The use of AOO is RECOMMENDED unless it may
+      cause a desynchronization for that option, in which case the option SHOULD
+      be placed in full more in <xref target='optrcss'/>.
+      </li>
+   </ul>
+   <t>
    When a child receives a DIO from a candidate parent, for each option:
    </t>
    <dl>
@@ -473,13 +495,13 @@
    the same or carries a more recent update than the one with an older RCSS.
    </t><t>
    The RCSS of an option may be obtained from a DIO message that carries the
-   option in full even if the RCSS of the DIO is not the freshest across parents,
-   as long as the RCSS of the DIO is fresher than the current one for that option.
+   option in full even if the RCSS of the DIO is not the freshest across
+   parents, as long as the RCSS of the DIO is fresher than the current one for
+   that option.
    </t><t>
    If the current value of the maintained RCSS for a given option is not fresher or as fresh as that advertised in a DIO message, then the child MUST update
    its state for that option as specified in <xref target="sync"/>.
    </t>
-
 
    </section> <!--end section RCSS of an Option -->
 
@@ -488,6 +510,13 @@
 <section  anchor='sync'> <name>Synchronizing Options</name>
 
    <t>
+   As the value of the RCSS progresses, it is NOT RECOMMENDED for a child to
+   attempt to resynchronize to an intermediate value of a RCSS with a parent
+   that is already back level vs. the lastest known RCSS or the RCSS that this
+   child is currently using, or a parent that is out-of-sync with self. The
+   child MAY only do so if it lost reachability to all the candidate parents
+   that advertise a fresher and not out-of-sync value of RCSS.
+   </t><t>
    A child can resynchronize any of the protected options to the latest RCSS by
    sending a DIS Message to a candidate parent that advertises that RCSS in DIO
    messages. The child MUST set the desired combination of 'R', 'D', 'P', 'M'
@@ -502,8 +531,13 @@
    the DIS Message. This means all of the protected options of the child was
    never synchronized or is out-of-sync with the parent. The other options MUST
    be added in the abbreviated form. The options MAY be spread over more than
-   one DIO message sent in a quick sequence and the child SHOULD wait a
-   reasonable technology-dependent time before it retries the request.
+   one DIO message sent in a quick sequence. It is possible that the DIS is not
+   received by the parent or that a DIO that carries all or subset of the
+   requested options is lost in return. In that case the child MUST resend a DIS
+   with the bits associated to the options that are still missing after a
+   reasonable technology-dependent time before it retries the request. The child
+   MAY use any parent that advertises the RCSS to get any of the options up to
+   that level.
    </t>
 
 </section> <!-- Synchronizing Options -->
