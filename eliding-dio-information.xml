@@ -13,7 +13,7 @@
 <?rfc subcompact="no"?>
 <?rfc authorship="yes"?>
 <?rfc tocappendix="yes"?>
-<rfc  xmlns:xi="http://www.w3.org/2001/XInclude" category="std" ipr='trust200902' tocInclude="true"  obsoletes="" updates="6550" consensus="true" submissionType="IETF" xml:lang="en" version="3" docName="draft-thubert-roll-eliding-dio-information-02" >
+<rfc  xmlns:xi="http://www.w3.org/2001/XInclude" category="std" ipr='trust200902' tocInclude="true"  obsoletes="" updates="6550" consensus="true" submissionType="IETF" xml:lang="en" version="3" docName="draft-thubert-roll-eliding-dio-information-03" >
 
 <front>
 
@@ -33,18 +33,6 @@
       </address>
    </author>
 
-    <author initials="D." surname="Barthel" fullname="Dominique Barthel">
-      <organization>Orange Labs</organization>
-      <address>
-        <postal>
-          <street ascii="28 chemin du Vieux Chene">28 chemin du Vieux Chêne</street>
-          <code>38243</code>
-          <city>Meylan</city>
-          <country>France</country>
-        </postal>
-        <email>dominique.barthel@orange.com</email>
-      </address>
-    </author>
 
     <author fullname="Rahul Arvind Jadhav" initials="R.A." surname="Jadhav">
         <organization>Huawei Tech</organization>
@@ -75,6 +63,19 @@
           </address>
        </author>
 
+    <author initials="D." surname="Barthel" fullname="Dominique Barthel">
+      <organization>Orange Labs</organization>
+      <address>
+        <postal>
+          <street ascii="28 chemin du Vieux Chene">28 chemin du Vieux Chêne</street>
+          <code>38243</code>
+          <city>Meylan</city>
+          <country>France</country>
+        </postal>
+        <email>dominique.barthel@orange.com</email>
+      </address>
+    </author>
+
    <date/>
    <area>Routing Area</area>
    <workgroup>ROLL</workgroup>
@@ -82,11 +83,12 @@
    <abstract>
       <t>
       This document presents a method to safely elide a group of RPL
-      options by synchonizing the state associated with each of these
-      options between parent and child using a new sequence counter in DIO
+      options in a DIO message by synchonizing the state associated with each of
+      these options between parent and child using a new sequence counter in DIO
       or DAO messages.  A child that missed a DIO message with an update of
       any of those protected options detects it by the change of sequence
-      counter and queries the update with a DIS Message.
+      counter and queries the update with a DIS Message. The draft also provides
+      a method to fully elide the options in a DAO message.
       </t>
    </abstract>
 </front>
@@ -241,8 +243,11 @@
    the protected options by a node that missed a change, more in <xref target=
    'udis'/>.
    </t><t>
-   This document also adds a new flag in the DAO Base Object to indicate
-   DAO in abbreviated version, more in <xref target='udao'/>.
+   This document also enables to abbreviate a full DAO message when all the
+   options are unchanged from the previous DAO message that was positively
+   acknowledged. In that case the DAO is resent with the same DAOSequence
+   and all the options are elided. A new flag in the DAO Base Object indicates
+   that this is an abbreviated DAO message, more in <xref target='elidingDAO'/>.
    </t>
 </section><!-- end section Updating RFC 6550 -->
 
@@ -393,15 +398,6 @@
           <dt>A</dt>
           <dd>One Bit, indicates DAO in abbreviated version</dd>
    </dl>
-   <t>
-   When a node receives a DAO-ACK for a given DAO sequence, then if the
-   options of next DAO are all unchanged, the node MAY reuse the
-   DAOsequence and elide all options with 'A' flag set. The DAOsequence
-   is the last DAOsequence. This next DAO MAY also unset ‘K’ flag to not
-   expect a DAO-ACK, if node can assume the risk that the DAO is lost
-   and the state times out at the DAO receiver. It is RECOMMENDED in
-   non-storing mode because the DAO always has the same content.
-   </t>
 
    </section> <!-- end section Updated DAO Base Object -->
 
@@ -604,11 +600,64 @@
 
 </section> <!-- Synchronizing Options -->
 
+
+<section anchor="elidingDAO" numbered="true" toc="default">
+       <name>Abbreviating the DAO Message</name>
+   <t>
+   When a node receives a positive DAO-ACK upon a DAO message for a given
+   DAOSequence, The DAO-ACK indicates that the DAO was fully processed by its
+   destination (parent or Root). Until there's a change in one of the DAO
+   options since that DAOSequence, the next DAO messages merely refresh the
+   lifetime of the routes. In that case, increasing the DAOSequence creates
+   undesirable churn up the DODAG for no added value.
+   </t><t>
+   This specification enables a node to refresh the state in a destination that
+   is associated to one or more DAO message(s) that were acknowledged by that
+   destination without resending the DAO message(s) in full. Instead, the
+   node MAY use a single abbreviated DAO message that is sent to the same
+   destination and with the same DAOSequence as the DAO message(s) that it
+   refreshes, and with the 'A' flag set (see <xref target='udao'/>) to signal
+   it is an abbreviated DAO.
+   </t><t>
+   This can be more than one message if the node could not package all its state
+   in a single message, e.g., due to MTU restrictions. In that case the DAO
+   state that is refreshed is the aggregation of the DAO messages that were
+   acknowledged for the provided DAOSequence by that destination.
+   </t><t>
+   Upon the abbreviated DAO, the destination refreshes the state associated to
+   the original DAO message(s) received with that DAOSequence, typically by
+   extending the lifetimes of the routes that were advertised with the same
+   duration.
+   </t><t>
+   A node MAY also unset ‘K’ flag in the abbreviated DAP message and not expect
+   a DAO-ACK, if the node can assume the risk that the DAO is lost, e.g., if the
+   routes will be refreshed again before the lifetime expires.
+   </t><t>
+   Only the DAO message(s) with the last (freshest) DAOSequence can be a
+   abbreviated. A nod MUST NOT use an abbreviated DAO with a DAOSequence that is
+   not the freshest and it MUST NOT use the abbreviated form of the DAO until
+   the destination has acknowledged all state associated with that DAOSequence.
+   If a destination receives an abbreviated DAO with a DAOSequence that is not
+   the freshest from that node, or the destination does not have a state for
+   that node, then MUST send a DAO-ACK with a DAO Status indicating an error.
+   The destination MAY use a new Status of 'Out-of-Sync' in which case the node
+   MUST resent the DAO Message(s) in full with its freshest DAOSequence and the
+   destination resynchronizes to that level.
+   </t><t>
+   It is RECOMMENDED to use an abbreviated DAO messages whenever possible,
+   because a smaller DAO message consumes less energy and  bandwidth and has
+   better chances of delivery. In Non-Storing Mode the benefits increases
+   with the number of hops to the Root, and in Storing Mode with the amount of
+   state that is implicitely refreshed.
+   </t>
+</section> <!-- Abbreviated DAO Message -->
+
+
 <section anchor="SecurityConsiderations" numbered="true" toc="default">
        <name>Security Considerations</name>
    <t>TBD
    </t>
-</section>
+</section> <!-- Security Considerations -->
 
 <section numbered="true" toc="default">
 <name>IANA Considerations</name>
@@ -651,7 +700,7 @@
 
    </table>
 
-    </section><!-- end section  Destination Advertisement Object Flags -->
+    </section><!-- end section Destination Advertisement Object Flags -->
 
    <section anchor="ianaopttype" numbered="true" toc="default">
    <name>New RPL Control Message Option</name>

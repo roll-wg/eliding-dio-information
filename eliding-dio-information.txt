@@ -4,12 +4,12 @@
 
 ROLL                                                     P. Thubert, Ed.
 Internet-Draft                                             Cisco Systems
-Updates: 6550 (if approved)                                   D. Barthel
-Intended status: Standards Track                             Orange Labs
-Expires: 27 April 2020                                       R.A. Jadhav
-                                                             Huawei Tech
-                                                                 L. Zhao
+Updates: 6550 (if approved)                                  R.A. Jadhav
+Intended status: Standards Track                             Huawei Tech
+Expires: 27 April 2020                                           L. Zhao
                                                            Cisco Systems
+                                                              D. Barthel
+                                                             Orange Labs
                                                          25 October 2019
 
 
@@ -70,27 +70,28 @@ Table of Contents
    2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   4
      2.1.  BCP 14  . . . . . . . . . . . . . . . . . . . . . . . . .   4
      2.2.  References  . . . . . . . . . . . . . . . . . . . . . . .   4
-     2.3.  Glossary  . . . . . . . . . . . . . . . . . . . . . . . .   4
+     2.3.  Glossary  . . . . . . . . . . . . . . . . . . . . . . . .   5
    3.  Updating RFC 6550 . . . . . . . . . . . . . . . . . . . . . .   5
    4.  Message Formats . . . . . . . . . . . . . . . . . . . . . . .   5
-     4.1.  Updated DIO Base Object . . . . . . . . . . . . . . . . .   5
+     4.1.  Updated DIO Base Object . . . . . . . . . . . . . . . . .   6
      4.2.  Updated DIS Base Object . . . . . . . . . . . . . . . . .   6
      4.3.  New Abbreviated Option Option . . . . . . . . . . . . . .   7
-     4.4.  Updated DAO Base Object . . . . . . . . . . . . . . . . .   7
+     4.4.  Updated DAO Base Object . . . . . . . . . . . . . . . . .   8
    5.  RCSS Operation  . . . . . . . . . . . . . . . . . . . . . . .   8
      5.1.  Updating the RCSS . . . . . . . . . . . . . . . . . . . .   9
      5.2.  RCSS Freshness and Parent selection . . . . . . . . . . .  10
      5.3.  RCSS of an Option . . . . . . . . . . . . . . . . . . . .  10
    6.  Synchronizing Options . . . . . . . . . . . . . . . . . . . .  12
-   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  12
-   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  12
-     8.1.  New DODAG Information Solicitation Flags  . . . . . . . .  12
-     8.2.  New DODAG Advertisement Object Flag . . . . . . . . . . .  13
-     8.3.  New RPL Control Message Option  . . . . . . . . . . . . .  13
-   9.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  13
-   10. Normative References  . . . . . . . . . . . . . . . . . . . .  13
-   11. Informative References  . . . . . . . . . . . . . . . . . . .  14
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  14
+   7.  Abbreviating the DAO Message  . . . . . . . . . . . . . . . .  12
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  13
+   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  13
+     9.1.  New DODAG Information Solicitation Flags  . . . . . . . .  14
+     9.2.  New DODAG Advertisement Object Flag . . . . . . . . . . .  14
+     9.3.  New RPL Control Message Option  . . . . . . . . . . . . .  14
+   10. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  15
+   11. Normative References  . . . . . . . . . . . . . . . . . . . .  15
+   12. Informative References  . . . . . . . . . . . . . . . . . . .  15
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  16
 
 1.  Introduction
 
@@ -104,8 +105,7 @@ Table of Contents
    [RPL] does not operate that way.  With RPL, the routing information
    is repeated over and over in DODAG Information Object (DIO) and
    Destination Advertisement Object (DAO) messages.  There is no concept
-   of synchronization.  The most recent information overrides a previous
-   one and a stale state eventually times out.
+
 
 
 
@@ -113,6 +113,9 @@ Thubert, et al.           Expires 27 April 2020                 [Page 2]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
+
+   of synchronization.  The most recent information overrides a previous
+   one and a stale state eventually times out.
 
    The RPL way was designed to enable routing from most nodes to most
    nodes most of the time in a Low-Power Lossy Network (LLN) where the
@@ -159,9 +162,6 @@ Internet-Draft              Eliding RPL Info                October 2019
 
    5.  The Global Capabilities Option (GCO) defined in [MOPEX-CAP]
 
-   Any change in those options causes an increment of the RCSS and
-   enables a network-wide synchronization to the new state.  If the
-   change impacts the routing substantially, the Root should decide to
 
 
 
@@ -170,6 +170,9 @@ Thubert, et al.           Expires 27 April 2020                 [Page 3]
 Internet-Draft              Eliding RPL Info                October 2019
 
 
+   Any change in those options causes an increment of the RCSS and
+   enables a network-wide synchronization to the new state.  If the
+   change impacts the routing substantially, the Root should decide to
    increment the Version Number at the same time to fully rebuild the
    DODAG with the new settings of the options.  It must be noted that
    the operation of the Version Number in itself provides no guarantee
@@ -214,9 +217,6 @@ Internet-Draft              Eliding RPL Info                October 2019
    refer to a RAL or a RPL router that participates to RPL and
    advertises its addresses of prefixes by itself.
 
-2.3.  Glossary
-
-   This document often uses the following acronyms:
 
 
 
@@ -225,6 +225,10 @@ Thubert, et al.           Expires 27 April 2020                 [Page 4]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
+
+2.3.  Glossary
+
+   This document often uses the following acronyms:
 
    DODAG  Destination-Oriented Directed Acyclic Graph
 
@@ -259,18 +263,14 @@ Internet-Draft              Eliding RPL Info                October 2019
    query of the protected options by a node that missed a change, more
    in Section 4.2.
 
-   This document also adds a new flag in the DAO Base Object to indicate
-   DAO in abbreviated version, more in Section 4.4.
+   This document also enables to abbreviate a full DAO message when all
+   the options are unchanged from the previous DAO message that was
+   positively acknowledged.  In that case the DAO is resent with the
+   same DAOSequence and all the options are elided.  A new flag in the
+   DAO Base Object indicates that this is an abbreviated DAO message,
+   more in Section 7.
 
 4.  Message Formats
-
-4.1.  Updated DIO Base Object
-
-   The format of the DIO Base Object is defined in section 6.3.1 of
-   [RPL].  This specification uses a 8th octet that was reserved in
-   [RPL] to transport the RCSS.
-
-
 
 
 
@@ -281,6 +281,12 @@ Thubert, et al.           Expires 27 April 2020                 [Page 5]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
+
+4.1.  Updated DIO Base Object
+
+   The format of the DIO Base Object is defined in section 6.3.1 of
+   [RPL].  This specification uses a 8th octet that was reserved in
+   [RPL] to transport the RCSS.
 
       0                   1                   2                   3
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -324,12 +330,6 @@ Internet-Draft              Eliding RPL Info                October 2019
 
    Updated fields:
 
-   R 
-      One Bit, indicates that the RIO is requested
-
-   D 
-      One Bit, indicates that the DCO is requested
-
 
 
 
@@ -337,6 +337,12 @@ Thubert, et al.           Expires 27 April 2020                 [Page 6]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
+
+   R 
+      One Bit, indicates that the RIO is requested
+
+   D 
+      One Bit, indicates that the DCO is requested
 
    P 
       One Bit, indicates that the PIO(s) is(are) requested
@@ -370,7 +376,7 @@ Internet-Draft              Eliding RPL Info                October 2019
 
    Option Type
       One byte indicating "Abbreviated Option", see Table 3 in
-      Section 8.3
+      Section 9.3
 
    Option Length
       MUST be set to 2 indicating Option data of 2 bytes
@@ -381,18 +387,18 @@ Internet-Draft              Eliding RPL Info                October 2019
    Last Modification RCSS
       The RCSS at which the option was last modified
 
-4.4.  Updated DAO Base Object
-
-   The format of the DAO Base Object is defined in section 6.4.1 of
-   [RPL].  This specification adds a 'A' flag in to indicate the DAO
-   options eliding.
-
 
 
 Thubert, et al.           Expires 27 April 2020                 [Page 7]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
+
+4.4.  Updated DAO Base Object
+
+   The format of the DAO Base Object is defined in section 6.4.1 of
+   [RPL].  This specification adds a 'A' flag in to indicate the DAO
+   options eliding.
 
       0                   1                   2                   3
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -417,14 +423,6 @@ Internet-Draft              Eliding RPL Info                October 2019
    A 
       One Bit, indicates DAO in abbreviated version
 
-   When a node receives a DAO-ACK for a given DAO sequence, then if the
-   options of next DAO are all unchanged, the node MAY reuse the
-   DAOsequence and elide all options with 'A' flag set.  The DAOsequence
-   is the last DAOsequence.  This next DAO MAY also unset 'K' flag to
-   not expect a DAO-ACK, if node can assume the risk that the DAO is
-   lost and the state times out at the DAO receiver.  It is RECOMMENDED
-   in non-storing mode because the DAO always has the same content.
-
 5.  RCSS Operation
 
    Settings and updates to network-wide parameters are initiated by the
@@ -442,6 +440,8 @@ Internet-Draft              Eliding RPL Info                October 2019
 
    The Root of the DODAG is autoritative to set and update the RCSS and
    the options that it protects.  The RCSS and the protected options are
+   propagated together down the DODAG without a change, more in
+   Section 5.1.
 
 
 
@@ -449,9 +449,6 @@ Thubert, et al.           Expires 27 April 2020                 [Page 8]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
-
-   propagated together down the DODAG without a change, more in
-   Section 5.1.
 
    The RCSS allows a child node to recognize the fresher DIO Message(s)
    as received from one or more advertising parents and to use only
@@ -498,6 +495,9 @@ Internet-Draft              Eliding RPL Info                October 2019
 
    The Root SHOULD jump rapidly away from the straight part once the
    network has sufficiently settled by resetting the RCSS to 0, which
+   places the RCSS in the circular region of the lollipop, where the
+   protected options MAY be elided or abbreviated.
+
 
 
 
@@ -505,9 +505,6 @@ Thubert, et al.           Expires 27 April 2020                 [Page 9]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
-
-   places the RCSS in the circular region of the lollipop, where the
-   protected options MAY be elided or abbreviated.
 
 5.2.  RCSS Freshness and Parent selection
 
@@ -553,7 +550,10 @@ Internet-Draft              Eliding RPL Info                October 2019
       previous DIO; eliding options is PREFERRED in stable conditions to
       save resources.
 
-
+   *  When a protected option is updated, the RCSS is mechanically
+      incremented, and the new option MUST be sent in full on the first
+      DIO that advertises that new RCSS and the corresponding AOO SHOULD
+      NOT be added.
 
 
 
@@ -561,11 +561,6 @@ Thubert, et al.           Expires 27 April 2020                [Page 10]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
-
-   *  When a protected option is updated, the RCSS is mechanically
-      incremented, and the new option MUST be sent in full on the first
-      DIO that advertises that new RCSS and the corresponding AOO SHOULD
-      NOT be added.
 
    *  When the RCSS is updated but a protected option is unchanged, the
       parent SHOULD NOT fully elide the option as it may cause multiple
@@ -610,6 +605,11 @@ Internet-Draft              Eliding RPL Info                October 2019
 
    If the current value of the maintained RCSS for a given option is not
    fresher or as fresh as that advertised in a DIO message, then the
+   child MUST update its state for that option as specified in
+   Section 6.
+
+
+
 
 
 
@@ -617,9 +617,6 @@ Thubert, et al.           Expires 27 April 2020                [Page 11]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
-
-   child MUST update its state for that option as specified in
-   Section 6.
 
 6.  Synchronizing Options
 
@@ -655,17 +652,20 @@ Internet-Draft              Eliding RPL Info                October 2019
    retries the request.  The child MAY use any parent that advertises
    the RCSS to get any of the options up to that level.
 
-7.  Security Considerations
+7.  Abbreviating the DAO Message
 
-   TBD
+   When a node receives a positive DAO-ACK upon a DAO message for a
+   given DAOSequence, The DAO-ACK indicates that the DAO was fully
+   processed by its destination (parent or Root).  Until there's a
+   change in one of the DAO options since that DAOSequence, the next DAO
+   messages merely refresh the lifetime of the routes.  In that case,
+   increasing the DAOSequence creates undesirable churn up the DODAG for
+   no added value.
 
-8.  IANA Considerations
-
-8.1.  New DODAG Information Solicitation Flags
-
-   5 new bits are allocated in the Registry for the DODAG Information
-   Solicitation (DIS) Flags defined for [RPL].
-
+   This specification enables a node to refresh the state in a
+   destination that is associated to one or more DAO message(s) that
+   were acknowledged by that destination without resending the DAO
+   message(s) in full.  Instead, the node MAY use a single abbreviated
 
 
 
@@ -673,6 +673,67 @@ Thubert, et al.           Expires 27 April 2020                [Page 12]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
+
+   DAO message that is sent to the same destination and with the same
+   DAOSequence as the DAO message(s) that it refreshes, and with the 'A'
+   flag set (see Section 4.4) to signal it is an abbreviated DAO.
+
+   This can be more than one message if the node could not package all
+   its state in a single message, e.g., due to MTU restrictions.  In
+   that case the DAO state that is refreshed is the aggregation of the
+   DAO messages that were acknowledged for the provided DAOSequence by
+   that destination.
+
+   Upon the abbreviated DAO, the destination refreshes the state
+   associated to the original DAO message(s) received with that
+   DAOSequence, typically by extending the lifetimes of the routes that
+   were advertised with the same duration.
+
+   A node MAY also unset 'K' flag in the abbreviated DAP message and not
+   expect a DAO-ACK, if the node can assume the risk that the DAO is
+   lost, e.g., if the routes will be refreshed again before the lifetime
+   expires.
+
+   Only the DAO message(s) with the last (freshest) DAOSequence can be a
+   abbreviated.  A nod MUST NOT use an abbreviated DAO with a
+   DAOSequence that is not the freshest and it MUST NOT use the
+   abbreviated form of the DAO until the destination has acknowledged
+   all state associated with that DAOSequence.  If a destination
+   receives an abbreviated DAO with a DAOSequence that is not the
+   freshest from that node, or the destination does not have a state for
+   that node, then MUST send a DAO-ACK with a DAO Status indicating an
+   error.  The destination MAY use a new Status of 'Out-of-Sync' in
+   which case the node MUST resent the DAO Message(s) in full with its
+   freshest DAOSequence and the destination resynchronizes to that
+   level.
+
+   It is RECOMMENDED to use an abbreviated DAO messages whenever
+   possible, because a smaller DAO message consumes less energy and
+   bandwidth and has better chances of delivery.  In Non-Storing Mode
+   the benefits increases with the number of hops to the Root, and in
+   Storing Mode with the amount of state that is implicitely refreshed.
+
+8.  Security Considerations
+
+   TBD
+
+9.  IANA Considerations
+
+
+
+
+
+
+
+Thubert, et al.           Expires 27 April 2020                [Page 13]
+
+Internet-Draft              Eliding RPL Info                October 2019
+
+
+9.1.  New DODAG Information Solicitation Flags
+
+   5 new bits are allocated in the Registry for the DODAG Information
+   Solicitation (DIS) Flags defined for [RPL].
 
         +------------+----------------------------+--------------+
         | Bit Number | Capability description     | Defining RFC |
@@ -690,7 +751,7 @@ Internet-Draft              Eliding RPL Info                October 2019
 
                           Table 1: New DIS Flags
 
-8.2.  New DODAG Advertisement Object Flag
+9.2.  New DODAG Advertisement Object Flag
 
    1 new bit is allocated in the Registry for the Destination
    Advertisement Object(DAO) Flags defined for[RPL].
@@ -703,7 +764,7 @@ Internet-Draft              Eliding RPL Info                October 2019
 
                            Table 2: New DAO Flag
 
-8.3.  New RPL Control Message Option
+9.3.  New RPL Control Message Option
 
    A new entry is required for the new option of type "Abbreviated
    Option", from the "RPL Control Message Options" space defined for
@@ -717,18 +778,18 @@ Internet-Draft              Eliding RPL Info                October 2019
 
                          Table 3: New Option Type
 
-9.  Acknowledgments
-
-
-10.  Normative References
 
 
 
-
-Thubert, et al.           Expires 27 April 2020                [Page 13]
+Thubert, et al.           Expires 27 April 2020                [Page 14]
 
 Internet-Draft              Eliding RPL Info                October 2019
 
+
+10.  Acknowledgments
+
+
+11.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -770,7 +831,16 @@ Internet-Draft              Eliding RPL Info                October 2019
               7 August 2019, <https://tools.ietf.org/html/draft-ietf-
               roll-useofrplinfo-31>.
 
-11.  Informative References
+12.  Informative References
+
+
+
+
+
+Thubert, et al.           Expires 27 April 2020                [Page 15]
+
+Internet-Draft              Eliding RPL Info                October 2019
+
 
 Authors' Addresses
 
@@ -778,27 +848,10 @@ Authors' Addresses
    Cisco Systems, Inc
    Building D, 45 Allee des Ormes - BP1200
    06254 Mougins - Sophia Antipolis
-
-
-
-Thubert, et al.           Expires 27 April 2020                [Page 14]
-
-Internet-Draft              Eliding RPL Info                October 2019
-
-
    France
 
    Phone: +33 497 23 26 34
    Email: pthubert@cisco.com
-
-
-   Dominique Barthel
-   Orange Labs
-   28 chemin du Vieux Chêne
-   38243 Meylan
-   France
-
-   Email: dominique.barthel@orange.com
 
 
    Rahul Arvind Jadhav
@@ -822,6 +875,13 @@ Internet-Draft              Eliding RPL Info                October 2019
    Email: liz3@cisco.com
 
 
+   Dominique Barthel
+   Orange Labs
+   28 chemin du Vieux Chêne
+   38243 Meylan
+   France
+
+   Email: dominique.barthel@orange.com
 
 
 
@@ -833,8 +893,4 @@ Internet-Draft              Eliding RPL Info                October 2019
 
 
 
-
-
-
-
-Thubert, et al.           Expires 27 April 2020                [Page 15]
+Thubert, et al.           Expires 27 April 2020                [Page 16]
