@@ -61,18 +61,32 @@
         </address>
     </author>
 
+    <author initials="L." surname="Zhao" fullname="Li Zhao">
+        <organization abbrev="Cisco Systems">Cisco Systems, Inc</organization>
+          <address>
+             <postal>
+                <street>Xinsi Building</street>
+                <street>No. 926 Yi Shan Rd </street>
+                <city>SHANGHAI </city>
+                <code>200233</code>
+                <country>CHINA</country>
+             </postal>
+             <email>liz3@cisco.com</email>
+          </address>
+       </author>
+
    <date/>
    <area>Routing Area</area>
    <workgroup>ROLL</workgroup>
    <keyword>Draft</keyword>
    <abstract>
       <t>
-      This document presents a method to safely elide a group of global RPL
-      options by synchonizing the state associated with each of these options
-      between parent and child using a new sequence counter in DIO messages.
-      A child that missed a DIO message with an update of any of those protected
-      options detects it by the change of sequence counter and queries the
-      update with a DIS Message.
+      This document presents a method to safely elide a group of RPL
+      options by synchonizing the state associated with each of these
+      options between parent and child using a new sequence counter in DIO
+      or DAO messages.  A child that missed a DIO message with an update of
+      any of those protected options detects it by the change of sequence
+      counter and queries the update with a DIS Message.
       </t>
    </abstract>
 </front>
@@ -223,9 +237,12 @@
    protected option that indicates the RCSS of the last change of that option,
    but elides its content, more in <xref target='syopts'/>.
    </t><t>
-   This document modifies the DIS Base Objectto enable the individual query of
+   This document modifies the DIS Base Object to enable the individual query of
    the protected options by a node that missed a change, more in <xref target=
    'udis'/>.
+   </t><t>
+   This document also adds a new flag in the DAO Base Object to indicate
+   DAO in abbreviated version, more in <xref target='udao'/>.
    </t>
 </section><!-- end section Updating RFC 6550 -->
 
@@ -320,8 +337,8 @@
        <figure anchor="FigABB">
               <name>Abbreviated Option Option Format</name>
        <artwork align="center" name="" type="" alt="">
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2
+  0                   1                   2                   3
+  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  |  Option Type  | Option Length | Abbrev. opt.  | Last Mod RCSS |
  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -342,6 +359,51 @@
           <dd>The RCSS at which the option was last modified</dd>
    </dl>
    </section> <!-- end section New Abbreviated Option Option -->
+
+   <section  anchor='udao'> <name>Updated DAO Base Object</name>
+   <t>
+   The format of the DAO Base Object is defined in section 6.4.1 of
+   <xref target="RFC6550"/>. This specification adds a 'A' flag in to indicate the DAO
+   options eliding.
+   </t>
+       <figure anchor="FigDAO">
+              <name>Updated DAO Base Object</name>
+       <artwork align="center" name="" type="" alt="">
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| RPLInstanceID |K|D|A| Flags   |   Reserved    | DAOSequence   |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                                                               +
+|                                                               |
++                            DODAGID*                           +
+|                                                               |
++                                                               +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Option(s)...
++-+-+-+-+-+-+-+-+
+       </artwork>
+       </figure>
+   <t>
+   Updated fields:
+   </t>
+   <dl newline="true" spacing="normal" indent="3">
+          <dt>A</dt>
+          <dd>One Bit, indicates DAO in abbreviated version</dd>
+   </dl>
+   <t>
+   When a node receives a DAO-ACK for a given DAO sequence, then if the
+   options of next DAO are all unchanged, the node MAY reuse the
+   DAOsequence and elide all options with 'A' flag set. The DAOsequence
+   is the last DAOsequence. This next DAO MAY also unset ‘K’ flag to not
+   expect a DAO-ACK, if node can assume the risk that the DAO is lost
+   and the state times out at the DAO receiver. It is RECOMMENDED in
+   non-storing mode because the DAO always has the same content.
+   </t>
+
+   </section> <!-- end section Updated DAO Base Object -->
 
 </section> <!-- Message Formats -->
 
@@ -552,13 +614,13 @@
 <name>IANA Considerations</name>
 
    <section anchor="ianadisflags" numbered="true" toc="default">
-   <name>New DODAG Information Object Flags</name>
+   <name>New DODAG Information Solicitation Flags</name>
    <t>
-   5 new bits are allocated in the Registry for the DODAG Information Object
-   (DIO) Flags defined for <xref target="RFC6550"/>.
+   5 new bits are allocated in the Registry for the DODAG Information Solicitation
+   (DIS) Flags defined for <xref target="RFC6550"/>.
    </t>
 
-   <table anchor="ianadisflagstbl"><name>New DIO Flags</name>
+   <table anchor="ianadisflagstbl"><name>New DIS Flags</name>
    <thead>
       <tr><td>Bit Number</td><td>Capability description</td><td>Defining RFC</td></tr>
    </thead><tbody>
@@ -571,9 +633,25 @@
 
    </table>
 
-    </section><!-- end section  New RPL Control Message Option -->
+    </section><!-- end section  DODAG Information Solicitation Flags -->
 
+   <section anchor="ianadaoflags" numbered="true" toc="default">
+   <name>New DODAG Advertisement Object Flag</name>
+   <t>
+   1 new bit is allocated in the Registry for the Destination
+   Advertisement Object(DAO) Flags defined for<xref target="RFC6550"/>.
+   </t>
 
+   <table anchor="ianadaoflagstbl"><name>New DAO Flag</name>
+   <thead>
+      <tr><td>Bit Number</td><td>Capability description</td><td>Defining RFC</td></tr>
+   </thead><tbody>
+      <tr><td>2</td><td>'A' bit "DAO abbreviated"</td><td>THIS RFC</td></tr>
+   </tbody>
+
+   </table>
+
+    </section><!-- end section  Destination Advertisement Object Flags -->
 
    <section anchor="ianaopttype" numbered="true" toc="default">
    <name>New RPL Control Message Option</name>
