@@ -75,26 +75,27 @@ Table of Contents
      2.2.  References  . . . . . . . . . . . . . . . . . . . . . . .   4
      2.3.  Glossary  . . . . . . . . . . . . . . . . . . . . . . . .   5
    3.  Updating RFC 6550 . . . . . . . . . . . . . . . . . . . . . .   5
-   4.  Message Formats . . . . . . . . . . . . . . . . . . . . . . .   5
+   4.  Message Formats . . . . . . . . . . . . . . . . . . . . . . .   6
      4.1.  Updated DIO Base Object . . . . . . . . . . . . . . . . .   6
      4.2.  Updated DIS Base Object . . . . . . . . . . . . . . . . .   6
      4.3.  New Abbreviated Option Option . . . . . . . . . . . . . .   7
      4.4.  Updated DAO Base Object . . . . . . . . . . . . . . . . .   8
-   5.  RCSS Operation  . . . . . . . . . . . . . . . . . . . . . . .   8
-     5.1.  Updating the RCSS . . . . . . . . . . . . . . . . . . . .   9
-     5.2.  RCSS Freshness and Parent selection . . . . . . . . . . .  10
-     5.3.  RCSS of an Option . . . . . . . . . . . . . . . . . . . .  10
-   6.  Synchronizing Options . . . . . . . . . . . . . . . . . . . .  12
-   7.  Abbreviating the DAO Message  . . . . . . . . . . . . . . . .  12
-   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  13
-   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  13
-     9.1.  New DODAG Information Solicitation Flags  . . . . . . . .  14
-     9.2.  New DODAG Advertisement Object Flag . . . . . . . . . . .  14
-     9.3.  New RPL Control Message Option  . . . . . . . . . . . . .  14
-   10. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  15
-   11. Normative References  . . . . . . . . . . . . . . . . . . . .  15
-   12. Informative References  . . . . . . . . . . . . . . . . . . .  15
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  16
+   5.  Behavior in response to a DIS . . . . . . . . . . . . . . . .   8
+   6.  RCSS Operation  . . . . . . . . . . . . . . . . . . . . . . .  10
+     6.1.  Updating the RCSS . . . . . . . . . . . . . . . . . . . .  10
+     6.2.  RCSS Freshness and Parent selection . . . . . . . . . . .  11
+     6.3.  RCSS of an Option . . . . . . . . . . . . . . . . . . . .  12
+   7.  Synchronizing Options . . . . . . . . . . . . . . . . . . . .  13
+   8.  Abbreviating the DAO Message  . . . . . . . . . . . . . . . .  14
+   9.  Security Considerations . . . . . . . . . . . . . . . . . . .  15
+   10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  15
+     10.1.  New DODAG Information Solicitation Flags . . . . . . . .  15
+     10.2.  New DODAG Advertisement Object Flag  . . . . . . . . . .  16
+     10.3.  New RPL Control Message Option . . . . . . . . . . . . .  16
+   11. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  16
+   12. Normative References  . . . . . . . . . . . . . . . . . . . .  16
+   13. Informative References  . . . . . . . . . . . . . . . . . . .  17
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  17
 
 1.  Introduction
 
@@ -104,7 +105,6 @@ Table of Contents
    known sequence number is older than the current, the node needs to
    learn one by one all the state changes between the last known and the
    current state.
-
 
 
 
@@ -252,7 +252,7 @@ Internet-Draft              Eliding RPL Info               November 2019
 
    This document adds a new field called RCSS to the DIO message.  The
    RCSS is a sequence counter set by the Root and operated as specified
-   in Section 7 of [RPL], more in Section 5.
+   in Section 7 of [RPL], more in Section 6.
 
    This document also introduces a new RPL Control Message Option called
    the Abbreviated Option Option (AOO).  The AOO is the compressed
@@ -261,16 +261,16 @@ Internet-Draft              Eliding RPL Info               November 2019
 
    This document modifies the DIS Base Object to enable the individual
    query of the protected options by a node that missed a change, more
-   in Section 4.2.
+   in Section 4.2.  It also allows a finer control over the way the DIO
+   is sent back.
 
    This document also enables to abbreviate a full DAO message when all
    the options are unchanged from the previous DAO message that was
    positively acknowledged.  In that case the DAO is resent with the
    same DAOSequence and all the options are elided.  A new flag in the
    DAO Base Object indicates that this is an abbreviated DAO message,
-   more in Section 7.
+   more in Section 8.
 
-4.  Message Formats
 
 
 
@@ -281,6 +281,8 @@ Thubert, et al.            Expires 7 May 2020                   [Page 5]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
+
+4.  Message Formats
 
 4.1.  Updated DIO Base Object
 
@@ -323,12 +325,10 @@ Internet-Draft              Eliding RPL Info               November 2019
               0                   1                   2
               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3
              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-             |R|D|P[M|O| Flg | LastSync RCSS |   Option(s)...
+             |R|D|P[M|O|N|T|f| LastSync RCSS |   Option(s)...
              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
                      Figure 2: Updated DIS Base Object
-
-   Updated fields:
 
 
 
@@ -337,6 +337,8 @@ Thubert, et al.            Expires 7 May 2020                   [Page 6]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
+
+   Updated fields:
 
    R 
       One Bit, indicates that the RIO is requested
@@ -352,6 +354,14 @@ Internet-Draft              Eliding RPL Info               November 2019
 
    O 
       One Bit, indicates that the GCO is requested
+
+   N 
+      One Bit, indicates that the DIS is not an inconsistency, even when
+      multicast
+
+   T 
+      One Bit, indicates the multicast DIS should be replied with a
+      multicast (T=0) or unicast (T=1) DIO
 
    Last Synchronized RCSS
       One Byte, indicates the freshest RCSS to which the querier was
@@ -375,8 +385,17 @@ Internet-Draft              Eliding RPL Info               November 2019
    Option fields:
 
    Option Type
+
+
+
+
+Thubert, et al.            Expires 7 May 2020                   [Page 7]
+
+Internet-Draft              Eliding RPL Info               November 2019
+
+
       One byte indicating "Abbreviated Option", see Table 3 in
-      Section 9.3
+      Section 10.3
 
    Option Length
       MUST be set to 2 indicating Option data of 2 bytes
@@ -386,13 +405,6 @@ Internet-Draft              Eliding RPL Info               November 2019
 
    Last Modification RCSS
       The RCSS at which the option was last modified
-
-
-
-Thubert, et al.            Expires 7 May 2020                   [Page 7]
-
-Internet-Draft              Eliding RPL Info               November 2019
-
 
 4.4.  Updated DAO Base Object
 
@@ -423,7 +435,78 @@ Internet-Draft              Eliding RPL Info               November 2019
    A 
       One Bit, indicates DAO in abbreviated version
 
-5.  RCSS Operation
+5.  Behavior in response to a DIS
+
+   Figure 5 and Figure 6 illustrate the normative behavior.
+
+
+
+
+
+
+
+Thubert, et al.            Expires 7 May 2020                   [Page 8]
+
+Internet-Draft              Eliding RPL Info               November 2019
+
+
+                              +--------------------+----------------------
+                              |    Unicast DIS     |         Multicast DIS
+                              +--------------------+--------------------+-
+                              |                    |         N=0        |
+         +--------------------+--------------------+--------------------+-
+         |                    | unicast DIO,       |                    |
+         | no option present  | don't              | do                 |
+         |                    | reset Trickle timer| reset Trickle timer|
+         +--------------------+--------------------+--------------------+-
+         | Solicited Informa- |                    |                    |
+         | tion/Metric Contai-| do nothing         | do nothing         |
+         | ner option present,|                    |                    |
+         | not matching.      |                    |                    |
+         +--------------------+--------------------+--------------------+-
+         | Solicited Informa- | unicast DIO,       |                    |
+         | tion/Metric Contai-| don't              | do                 |
+         | ner option present,| reset Trickle timer| reset Trickle timer|
+         | matching.          |                    |                    |
+         +--------------------+--------------------+--------------------+-
+
+                   Figure 5: Overall DIS behavior, part 1
+
+   Notice that Figure 5 is indeed identical to the behavior described in
+   [RPL] when Metric Container options are not used in DIS.
+
+         -------------------------------------------+
+          Multicast DIS                             |
+         ----------------------+--------------------+
+          |      N=1, T=0      |      N=1, T=1      |
+         -+--------------------+--------------------+
+          | multicast DIO,     | unicast DIO,       |
+          | don't              | don't              |
+          | reset Trickle timer| reset Trickle timer|
+         -+--------------------+--------------------+
+          |                    |                    |
+          | do nothing         | do nothing         |
+          |                    |                    |
+          |                    |                    |
+         -+--------------------+--------------------+
+          | multicast DIO,     | unicast DIO,       |
+          | don't              | don't              |
+          | reset Trickle timer| reset Trickle timer|
+          |                    |                    |
+         -+--------------------+--------------------+
+
+                   Figure 6: Overall DIS behavior, part 2
+
+
+
+
+
+Thubert, et al.            Expires 7 May 2020                   [Page 9]
+
+Internet-Draft              Eliding RPL Info               November 2019
+
+
+6.  RCSS Operation
 
    Settings and updates to network-wide parameters are initiated by the
    Root and propagated down the DODAG in RPL Control Message Options in
@@ -441,41 +524,43 @@ Internet-Draft              Eliding RPL Info               November 2019
    The Root of the DODAG is autoritative to set and update the RCSS and
    the options that it protects.  The RCSS and the protected options are
    propagated together down the DODAG without a change, more in
-   Section 5.1.
-
-
-
-Thubert, et al.            Expires 7 May 2020                   [Page 8]
-
-Internet-Draft              Eliding RPL Info               November 2019
-
+   Section 6.1.
 
    The RCSS allows a child node to recognize the fresher DIO Message(s)
    as received from one or more advertising parents and to use only
    parents with a consistent state of network-wide parameters, more in
-   Section 5.2.
+   Section 6.2.
 
    By extension, the RCSS is also defined for each protected option.  A
    child associates an option with the values of the RCSS indicated in
    DIO Messages in which the option is advertised and uses it to assess
    the relative freshness of different versions of an option, more in
-   Section 5.3.
+   Section 6.3.
 
    Unchanged options may be sent in full, elided, or in the abbreviated
    form specified in Section 4.3.  Which form to use depends on the
-   RCSS, more in Section 5.3
+   RCSS, more in Section 6.3
 
    If the link MTU does not permit to send a single DIO message with all
    the options packaged then the options may be spread over multiple
    consecutive DIO messages with the same RCSS that are sent in a rapid
    sequence.
 
-5.1.  Updating the RCSS
+6.1.  Updating the RCSS
 
    The RCSS is incremented by the Root using a lollipop technique as
    specified in section 7.2 of [RPL].  RCSS values are comparable if
    they are within a window of comparison of SEQUENCE_WINDOW increments
    or one indicates a reboot.
+
+
+
+
+
+Thubert, et al.            Expires 7 May 2020                  [Page 10]
+
+Internet-Draft              Eliding RPL Info               November 2019
+
 
    A reboot of the Root is detected when the RCSS moves from the
    circular to the straight part of the lollipop.  In order to maximize
@@ -498,15 +583,7 @@ Internet-Draft              Eliding RPL Info               November 2019
    places the RCSS in the circular region of the lollipop, where the
    protected options MAY be elided or abbreviated.
 
-
-
-
-Thubert, et al.            Expires 7 May 2020                   [Page 9]
-
-Internet-Draft              Eliding RPL Info               November 2019
-
-
-5.2.  RCSS Freshness and Parent selection
+6.2.  RCSS Freshness and Parent selection
 
    A child node maintains the freshest RCSS received from its parents in
    each of the RPL Instances that it participates to, and uses that RCSS
@@ -532,7 +609,16 @@ Internet-Draft              Eliding RPL Info               November 2019
    parent that exposes an older RCSS if the change causes an
    incompatibility issue.
 
-5.3.  RCSS of an Option
+
+
+
+
+Thubert, et al.            Expires 7 May 2020                  [Page 11]
+
+Internet-Draft              Eliding RPL Info               November 2019
+
+
+6.3.  RCSS of an Option
 
    By extension, the RCSS of an option is maintained by all nodes and is
    defined for all but the root as the freshest RCSS indicated by a DIO
@@ -555,19 +641,12 @@ Internet-Draft              Eliding RPL Info               November 2019
       DIO that advertises that new RCSS and the corresponding AOO SHOULD
       NOT be added.
 
-
-
-Thubert, et al.            Expires 7 May 2020                  [Page 10]
-
-Internet-Draft              Eliding RPL Info               November 2019
-
-
    *  When the RCSS is updated but a protected option is unchanged, the
       parent SHOULD NOT fully elide the option as it may cause multiple
       children to resynchronize it to no avail.  The use of AOO is
       RECOMMENDED unless it may cause a desynchronization for that
       option, in which case the option SHOULD be placed in full more in
-      Section 5.3.
+      Section 6.3.
 
    When a child receives a DIO from a candidate parent, for each option:
 
@@ -585,6 +664,15 @@ Internet-Draft              Eliding RPL Info               November 2019
    This means that if an Option is advertised in both the abbreviated
    form and in full in a same DIO message then the RCSS in the AOO has
    precedence.
+
+
+
+
+
+Thubert, et al.            Expires 7 May 2020                  [Page 12]
+
+Internet-Draft              Eliding RPL Info               November 2019
+
 
    To keep the RCSS comparable for each option, the RCSS of an option
    must lazily progress along with the global RCSS even if there was no
@@ -606,19 +694,9 @@ Internet-Draft              Eliding RPL Info               November 2019
    If the current value of the maintained RCSS for a given option is not
    fresher or as fresh as that advertised in a DIO message, then the
    child MUST update its state for that option as specified in
-   Section 6.
+   Section 7.
 
-
-
-
-
-
-Thubert, et al.            Expires 7 May 2020                  [Page 11]
-
-Internet-Draft              Eliding RPL Info               November 2019
-
-
-6.  Synchronizing Options
+7.  Synchronizing Options
 
    As the value of the RCSS progresses, it is NOT RECOMMENDED for a
    child to attempt to resynchronize to an intermediate value of a RCSS
@@ -644,6 +722,14 @@ Internet-Draft              Eliding RPL Info               November 2019
    protected options of the child was never synchronized or is out-of-
    sync with the parent.  The other options MUST be added in the
    abbreviated form.  The options MAY be spread over more than one DIO
+
+
+
+Thubert, et al.            Expires 7 May 2020                  [Page 13]
+
+Internet-Draft              Eliding RPL Info               November 2019
+
+
    message sent in a quick sequence.  It is possible that the DIS is not
    received by the parent or that a DIO that carries all or subset of
    the requested options is lost in return.  In that case the child MUST
@@ -652,7 +738,7 @@ Internet-Draft              Eliding RPL Info               November 2019
    retries the request.  The child MAY use any parent that advertises
    the RCSS to get any of the options up to that level.
 
-7.  Abbreviating the DAO Message
+8.  Abbreviating the DAO Message
 
    When a node receives a positive DAO-ACK upon a DAO message for a
    given DAOSequence, The DAO-ACK indicates that the DAO was fully
@@ -666,14 +752,6 @@ Internet-Draft              Eliding RPL Info               November 2019
    destination that is associated to one or more DAO message(s) that
    were acknowledged by that destination without resending the DAO
    message(s) in full.  Instead, the node MAY use a single abbreviated
-
-
-
-Thubert, et al.            Expires 7 May 2020                  [Page 12]
-
-Internet-Draft              Eliding RPL Info               November 2019
-
-
    DAO message that is sent to the same destination and with the same
    DAOSequence as the DAO message(s) that it refreshes, and with the 'A'
    flag set (see Section 4.4) to signal it is an abbreviated DAO.
@@ -700,6 +778,14 @@ Internet-Draft              Eliding RPL Info               November 2019
    abbreviated form of the DAO until the destination has acknowledged
    all state associated with that DAOSequence.  If a destination
    receives an abbreviated DAO with a DAOSequence that is not the
+
+
+
+Thubert, et al.            Expires 7 May 2020                  [Page 14]
+
+Internet-Draft              Eliding RPL Info               November 2019
+
+
    freshest from that node, or the destination does not have a state for
    that node, then MUST send a DAO-ACK with a DAO Status indicating an
    error.  The destination MAY use a new Status of 'Out-of-Sync' in
@@ -713,26 +799,15 @@ Internet-Draft              Eliding RPL Info               November 2019
    the benefits increases with the number of hops to the Root, and in
    Storing Mode with the amount of state that is implicitely refreshed.
 
-8.  Security Considerations
+9.  Security Considerations
 
    TBD
 
-9.  IANA Considerations
+10.  IANA Considerations
 
+10.1.  New DODAG Information Solicitation Flags
 
-
-
-
-
-
-Thubert, et al.            Expires 7 May 2020                  [Page 13]
-
-Internet-Draft              Eliding RPL Info               November 2019
-
-
-9.1.  New DODAG Information Solicitation Flags
-
-   5 new bits are allocated in the Registry for the DODAG Information
+   7 new bits are allocated in the Registry for the DODAG Information
    Solicitation (DIS) Flags defined for [RPL].
 
         +------------+----------------------------+--------------+
@@ -748,10 +823,26 @@ Internet-Draft              Eliding RPL Info               November 2019
         +------------+----------------------------+--------------+
         | 4          | 'O' bit "GCO irequested"   | THIS RFC     |
         +------------+----------------------------+--------------+
+        | 5          | 'N' bit "No-inconsistency" | THIS RFC     |
+        +------------+----------------------------+--------------+
+        | 6          | 'T' bit "Type of DIO       | THIS RFC     |
+        |            | (unicast/multicast)"       |              |
+        +------------+----------------------------+--------------+
 
                           Table 1: New DIS Flags
 
-9.2.  New DODAG Advertisement Object Flag
+
+
+
+
+
+
+Thubert, et al.            Expires 7 May 2020                  [Page 15]
+
+Internet-Draft              Eliding RPL Info               November 2019
+
+
+10.2.  New DODAG Advertisement Object Flag
 
    1 new bit is allocated in the Registry for the Destination
    Advertisement Object(DAO) Flags defined for[RPL].
@@ -764,7 +855,7 @@ Internet-Draft              Eliding RPL Info               November 2019
 
                            Table 2: New DAO Flag
 
-9.3.  New RPL Control Message Option
+10.3.  New RPL Control Message Option
 
    A new entry is required for the new option of type "Abbreviated
    Option", from the "RPL Control Message Options" space defined for
@@ -778,18 +869,10 @@ Internet-Draft              Eliding RPL Info               November 2019
 
                          Table 3: New Option Type
 
+11.  Acknowledgments
 
 
-
-Thubert, et al.            Expires 7 May 2020                  [Page 14]
-
-Internet-Draft              Eliding RPL Info               November 2019
-
-
-10.  Acknowledgments
-
-
-11.  Normative References
+12.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -806,6 +889,14 @@ Internet-Draft              Eliding RPL Info               November 2019
               Low-Power and Lossy Networks", RFC 6550,
               DOI 10.17487/RFC6550, March 2012,
               <https://www.rfc-editor.org/info/rfc6550>.
+
+
+
+
+Thubert, et al.            Expires 7 May 2020                  [Page 16]
+
+Internet-Draft              Eliding RPL Info               November 2019
+
 
    [RFC7228]  Bormann, C., Ersue, M., and A. Keranen, "Terminology for
               Constrained-Node Networks", RFC 7228,
@@ -831,16 +922,7 @@ Internet-Draft              Eliding RPL Info               November 2019
               7 August 2019, <https://tools.ietf.org/html/draft-ietf-
               roll-useofrplinfo-31>.
 
-12.  Informative References
-
-
-
-
-
-Thubert, et al.            Expires 7 May 2020                  [Page 15]
-
-Internet-Draft              Eliding RPL Info               November 2019
-
+13.  Informative References
 
 Authors' Addresses
 
@@ -863,6 +945,13 @@ Authors' Addresses
 
    Phone: +91-080-49160700
    Email: rahul.ietf@gmail.com
+
+
+
+
+Thubert, et al.            Expires 7 May 2020                  [Page 17]
+
+Internet-Draft              Eliding RPL Info               November 2019
 
 
    Li Zhao
@@ -893,4 +982,27 @@ Authors' Addresses
 
 
 
-Thubert, et al.            Expires 7 May 2020                  [Page 16]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Thubert, et al.            Expires 7 May 2020                  [Page 18]

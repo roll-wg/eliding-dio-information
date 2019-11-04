@@ -241,7 +241,7 @@
    </t><t>
    This document modifies the DIS Base Object to enable the individual query of
    the protected options by a node that missed a change, more in <xref target=
-   'udis'/>.
+   'udis'/>. It also allows a finer control over the way the DIO is sent back.
    </t><t>
    This document also enables to abbreviate a full DAO message when all the
    options are unchanged from the previous DAO message that was positively
@@ -306,7 +306,7 @@
   0                   1                   2
   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3
  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- |R|D|P[M|O| Flg | LastSync RCSS |   Option(s)...
+ |R|D|P[M|O|N|T|f| LastSync RCSS |   Option(s)...
  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    </artwork>
    </figure>
@@ -325,6 +325,10 @@
           <dd>One Bit, indicates that the MOPex is requested</dd>
           <dt>O</dt>
           <dd>One Bit, indicates that the GCO is requested</dd>
+          <dt>N</dt>
+          <dd>One Bit, indicates that the DIS is not an inconsistency, even when multicast</dd>
+          <dt>T</dt>
+          <dd>One Bit, indicates the multicast DIS should be replied with a multicast (T=0) or unicast (T=1) DIO</dd>
           <dt>Last Synchronized RCSS</dt>
           <dd>One Byte, indicates the freshest RCSS to which the querier was synchronized</dd>
    </dl>
@@ -402,6 +406,69 @@
    </section> <!-- end section Updated DAO Base Object -->
 
 </section> <!-- Message Formats -->
+
+
+    <section anchor="DISRespBehavior" title="Behavior in response to a DIS">
+      <t><xref target="this_DIS_behavior-1"></xref> and
+      <xref target="this_DIS_behavior-2"></xref> illustrate the normative behavior.
+      </t>
+
+      <figure anchor="this_DIS_behavior-1"
+              title="Overall DIS behavior, part 1"
+              >
+          <artwork><![CDATA[
+                           +--------------------+----------------------
+                           |    Unicast DIS     |         Multicast DIS
+                           +--------------------+--------------------+-
+                           |                    |         N=0        |
+      +--------------------+--------------------+--------------------+-
+      |                    | unicast DIO,       |                    |
+      | no option present  | don't              | do                 |
+      |                    | reset Trickle timer| reset Trickle timer|
+      +--------------------+--------------------+--------------------+-
+      | Solicited Informa- |                    |                    |
+      | tion/Metric Contai-| do nothing         | do nothing         |
+      | ner option present,|                    |                    |
+      | not matching.      |                    |                    |
+      +--------------------+--------------------+--------------------+-
+      | Solicited Informa- | unicast DIO,       |                    |
+      | tion/Metric Contai-| don't              | do                 |
+      | ner option present,| reset Trickle timer| reset Trickle timer|
+      | matching.          |                    |                    |
+      +--------------------+--------------------+--------------------+-
+]]></artwork>
+        </figure>
+        <t>Notice that <xref target="this_DIS_behavior-1"></xref> is indeed
+        identical to the behavior described in <xref target="RFC6550"/> when
+        Metric Container options are not used in DIS.
+        </t>
+        <figure anchor="this_DIS_behavior-2"
+              title="Overall DIS behavior, part 2">
+          <artwork><![CDATA[
+      -------------------------------------------+
+       Multicast DIS                             |
+      ----------------------+--------------------+
+       |      N=1, T=0      |      N=1, T=1      |
+      -+--------------------+--------------------+
+       | multicast DIO,     | unicast DIO,       |
+       | don't              | don't              |
+       | reset Trickle timer| reset Trickle timer|
+      -+--------------------+--------------------+
+       |                    |                    |
+       | do nothing         | do nothing         |
+       |                    |                    |
+       |                    |                    |
+      -+--------------------+--------------------+
+       | multicast DIO,     | unicast DIO,       |
+       | don't              | don't              |
+       | reset Trickle timer| reset Trickle timer|
+       |                    |                    |
+      -+--------------------+--------------------+
+]]></artwork>
+        </figure>
+
+    </section> <!-- end section Behavior as a reponse to a DIS -->
+
 
 <section  anchor='rcss'> <name>RCSS Operation</name>
 
@@ -665,7 +732,7 @@
    <section anchor="ianadisflags" numbered="true" toc="default">
    <name>New DODAG Information Solicitation Flags</name>
    <t>
-   5 new bits are allocated in the Registry for the DODAG Information Solicitation
+   7 new bits are allocated in the Registry for the DODAG Information Solicitation
    (DIS) Flags defined for <xref target="RFC6550"/>.
    </t>
 
@@ -678,6 +745,8 @@
       <tr><td>2</td><td>'P' bit "PIO(s) requested"</td><td>THIS RFC</td></tr>
       <tr><td>3</td><td>'M' bit "MOPex requested"</td><td>THIS RFC</td></tr>
       <tr><td>4</td><td>'O' bit "GCO irequested"</td><td>THIS RFC</td></tr>
+      <tr><td>5</td><td>'N' bit "No-inconsistency"</td><td>THIS RFC</td></tr>
+      <tr><td>6</td><td>'T' bit "Type of DIO (unicast/multicast)"</td><td>THIS RFC</td></tr>
    </tbody>
 
    </table>
