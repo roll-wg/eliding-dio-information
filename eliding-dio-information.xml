@@ -126,7 +126,7 @@
    that it sends repeatedly, to conserve battery and save bandwidth. When it
    does so, a newcomer child that missed DIOs that contained the configuration
    option may operate on default or partial information. If it is pessimistic,
-   it may query all possible the information even when it is not needed.
+   it may query all possible information even when it is not needed.
    Conversely, a node that slept may have missed a DIO with a change in some
    critical information and may not be even aware of it, so it may fail to query
    for the update and operate on deprecated parameters.
@@ -203,7 +203,7 @@
    that uses a RPL router (without necessarily knowing it) as 6LR and depends on
    that router to obtain reachability for its addresses inside the RPL domain.
    On the contrary, the term RPL-Aware Node (RAN) is used to refer to a RAL
-   or a RPL router that participates to RPL and advertises its addresses of
+   or a RPL router that participates to RPL and advertises its addresses or
    prefixes by itself.
    </t>
    </section>	<!-- end section "References" -->
@@ -257,8 +257,8 @@
    <section  anchor='udio'> <name>Updated DIO Base Object</name>
    <t>
    The format of the DIO Base Object is defined in section 6.3.1 of
-   <xref target="RFC6550"/>. This specification uses a 8th octet that was
-   reserved in <xref target="RFC6550"/> to transport the RCSS.
+   <xref target="RFC6550"/>. In order to transport the RCSS, this specification uses
+   an 8th octet that was reserved in <xref target="RFC6550"/>.
    </t>
        <figure anchor="FigDIO">
               <name>Updated DIO Base Object</name>
