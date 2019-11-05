@@ -140,9 +140,9 @@ Internet-Draft              Eliding RPL Info               November 2019
    sends repeatedly, to conserve battery and save bandwidth.  When it
    does so, a newcomer child that missed DIOs that contained the
    configuration option may operate on default or partial information.
-   If it is pessimistic, it may query all possible the information even
-   when it is not needed.  Conversely, a node that slept may have missed
-   a DIO with a change in some critical information and may not be even
+   If it is pessimistic, it may query all possible information even when
+   it is not needed.  Conversely, a node that slept may have missed a
+   DIO with a change in some critical information and may not be even
    aware of it, so it may fail to query for the update and operate on
    deprecated parameters.
 
@@ -287,8 +287,8 @@ Internet-Draft              Eliding RPL Info               November 2019
 4.1.  Updated DIO Base Object
 
    The format of the DIO Base Object is defined in section 6.3.1 of
-   [RPL].  This specification uses a 8th octet that was reserved in
-   [RPL] to transport the RCSS.
+   [RPL].  In order to transport the RCSS, this specification uses an
+   8th octet that was reserved in [RPL].
 
       0                   1                   2                   3
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -737,34 +737,34 @@ Internet-Draft              Eliding RPL Info               November 2019
    5 new bits are allocated in the Registry for the DODAG Information
    Solicitation (DIS) Flags defined for [RPL].
 
-        +------------+----------------------------+--------------+
-        | Bit Number | Capability description     | Defining RFC |
-        +============+============================+==============+
-        | 0          | 'R' bit "RIO requested"    | THIS RFC     |
-        +------------+----------------------------+--------------+
-        | 1          | 'D' bit "DCO requested"    | THIS RFC     |
-        +------------+----------------------------+--------------+
-        | 2          | 'P' bit "PIO(s) requested" | THIS RFC     |
-        +------------+----------------------------+--------------+
-        | 3          | 'M' bit "MOPex requested"  | THIS RFC     |
-        +------------+----------------------------+--------------+
-        | 4          | 'O' bit "GCO irequested"   | THIS RFC     |
-        +------------+----------------------------+--------------+
+          +------------+----------------------------+-----------+
+          | Bit Number | Capability description     | Reference |
+          +============+============================+===========+
+          | 0          | 'R' bit "RIO requested"    | THIS RFC  |
+          +------------+----------------------------+-----------+
+          | 1          | 'D' bit "DCO requested"    | THIS RFC  |
+          +------------+----------------------------+-----------+
+          | 2          | 'P' bit "PIO(s) requested" | THIS RFC  |
+          +------------+----------------------------+-----------+
+          | 3          | 'M' bit "MOPex requested"  | THIS RFC  |
+          +------------+----------------------------+-----------+
+          | 4          | 'O' bit "GCO irequested"   | THIS RFC  |
+          +------------+----------------------------+-----------+
 
-                          Table 1: New DIS Flags
+                           Table 1: New DIS Flags
 
 9.2.  New DODAG Advertisement Object Flag
 
    1 new bit is allocated in the Registry for the Destination
    Advertisement Object(DAO) Flags defined for[RPL].
 
-         +------------+---------------------------+--------------+
-         | Bit Number | Capability description    | Defining RFC |
-         +============+===========================+==============+
-         | 2          | 'A' bit "DAO abbreviated" | THIS RFC     |
-         +------------+---------------------------+--------------+
+          +------------+---------------------------+-----------+
+          | Bit Number | Capability description    | Reference |
+          +============+===========================+===========+
+          | 2          | 'A' bit "DAO abbreviated" | THIS RFC  |
+          +------------+---------------------------+-----------+
 
-                           Table 2: New DAO Flag
+                          Table 2: New DAO Flag
 
 9.3.  New RPL Control Message Option
 
@@ -786,13 +786,13 @@ Thubert, et al.            Expires 8 May 2020                  [Page 14]
 Internet-Draft              Eliding RPL Info               November 2019
 
 
-             +----------+--------------------+--------------+
-             | Code     | Description        | Defining RFC |
-             +==========+====================+==============+
-             | TBD IANA | Abbreviated Option | THIS RFC     |
-             +----------+--------------------+--------------+
+               +----------+--------------------+-----------+
+               | Code     | Description        | Reference |
+               +==========+====================+===========+
+               | TBD IANA | Abbreviated Option | THIS RFC  |
+               +----------+--------------------+-----------+
 
-                         Table 3: New Option Type
+                          Table 3: New Option Type
 
 10.  Acknowledgments
 

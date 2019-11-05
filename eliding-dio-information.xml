@@ -126,7 +126,7 @@
    that it sends repeatedly, to conserve battery and save bandwidth. When it
    does so, a newcomer child that missed DIOs that contained the configuration
    option may operate on default or partial information. If it is pessimistic,
-   it may query all possible the information even when it is not needed.
+   it may query all possible information even when it is not needed.
    Conversely, a node that slept may have missed a DIO with a change in some
    critical information and may not be even aware of it, so it may fail to query
    for the update and operate on deprecated parameters.
@@ -257,8 +257,8 @@
    <section  anchor='udio'> <name>Updated DIO Base Object</name>
    <t>
    The format of the DIO Base Object is defined in section 6.3.1 of
-   <xref target="RFC6550"/>. This specification uses a 8th octet that was
-   reserved in <xref target="RFC6550"/> to transport the RCSS.
+   <xref target="RFC6550"/>. In order to transport the RCSS, this specification uses
+   an 8th octet that was reserved in <xref target="RFC6550"/>.
    </t>
        <figure anchor="FigDIO">
               <name>Updated DIO Base Object</name>
@@ -671,7 +671,7 @@
 
    <table anchor="ianadisflagstbl"><name>New DIS Flags</name>
    <thead>
-      <tr><td>Bit Number</td><td>Capability description</td><td>Defining RFC</td></tr>
+      <tr><td>Bit Number</td><td>Capability description</td><td>Reference</td></tr>
    </thead><tbody>
       <tr><td>0</td><td>'R' bit "RIO requested"</td><td>THIS RFC</td></tr>
       <tr><td>1</td><td>'D' bit "DCO requested"</td><td>THIS RFC</td></tr>
@@ -693,7 +693,7 @@
 
    <table anchor="ianadaoflagstbl"><name>New DAO Flag</name>
    <thead>
-      <tr><td>Bit Number</td><td>Capability description</td><td>Defining RFC</td></tr>
+      <tr><td>Bit Number</td><td>Capability description</td><td>Reference</td></tr>
    </thead><tbody>
       <tr><td>2</td><td>'A' bit "DAO abbreviated"</td><td>THIS RFC</td></tr>
    </tbody>
@@ -712,7 +712,7 @@
 
    <table anchor="ianaopttypetbl"><name>New Option Type</name>
    <thead>
-      <tr><td>Code</td><td>Description</td><td>Defining RFC</td></tr>
+      <tr><td>Code</td><td>Description</td><td>Reference</td></tr>
    </thead><tbody>
       <tr><td>TBD IANA</td><td>Abbreviated Option</td><td>THIS RFC</td></tr>
    </tbody>
