@@ -196,15 +196,15 @@
    <xref target="RFC6550">"RPL: IPv6 Routing Protocol for Low-Power and Lossy
    Networks"</xref> specification.
    </t><t>
-   This document uses the terms RPL-Unaware Leaf (RUL) and RPL Aware Leaf
-   (RAL) consistently with <xref target="I-D.ietf-roll-useofrplinfo" />.
+   This document uses the terms RPL Leaf, RPL Aware Leaf (RAL), RPL-Aware Node
+   (RAN) and RPL-Unaware Leaf (RUL) as defined in section 2 of <xref target=
+   "I-D.ietf-roll-useofrplinfo"/>.
    </t><t>
-   The term RPL-Unaware Leaf (RUL) is used to refer to a node
-   that uses a RPL router (without necessarily knowing it) as 6LR and depends on
-   that router to obtain reachability for its addresses inside the RPL domain.
-   On the contrary, the term RPL-Aware Node (RAN) is used to refer to a RAL
-   or a RPL router that participates to RPL and advertises its addresses of
-   prefixes by itself.
+   A RPL-Unaware Leaf (RUL) thus refers to a host that does not understand
+   RPL but uses a RPL router (without necessarily knowing it) as 6LR and depends
+   on that router to obtain reachability for its addresses inside the RPL domain.
+   On the contrary, the term RPL-Aware Node (RAN) is used to refer to a node
+   that participates to RPL and advertises its addresses or prefixes by itself.
    </t>
    </section>	<!-- end section "References" -->
 
@@ -216,7 +216,7 @@
       <dt>LLN</dt><dd>Low-Power and Lossy Network </dd>
       <dt>RPI</dt><dd>RPL Packet Information (an Option in the Hop-By_Hop Header)</dd>
       <dt>RAL</dt><dd>RPL-Aware Leaf </dd>
-      <dt>RAN</dt><dd>RPL-Aware Node, a RPL router or a RPL-Aware Leaf </dd>
+      <dt>RAN</dt><dd>RPL-Aware Node </dd>
       <dt>RS</dt><dd>Router Solicitation</dd>
       <dt>RCSS</dt><dd>RPL Configuration State Sequence</dd>
       <dt>RPL</dt><dd>IPv6 Routing Protocol for LLNs (pronounced ripple) </dd>
