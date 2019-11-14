@@ -82,10 +82,10 @@
    <keyword>Draft</keyword>
    <abstract>
       <t>
-      This document presents a method to safely elide a group of RPL
-      options in a DIO message by synchonizing the state associated with each of
+      This document presents a method to safely elide a group of RPL options in
+      a DIO message by synchronizing the state associated with each of
       these options between parent and child using a new sequence counter in DIO
-      or DAO messages.  A child that missed a DIO message with an update of
+      messages.  A child that missed a DIO message with an update of
       any of those protected options detects it by the change of sequence
       counter and queries the update with a DIS Message. The draft also provides
       a method to fully elide the options in a DAO message.
@@ -586,7 +586,7 @@
    </t><t>
    The DIO message that is sent in response MUST contain in full all the options
    that are requested and that were updated since the Last Synchronized RCSS in
-   the DIS Message. This means all of the protected options of the child was
+   the DIS Message. This means all of the protected options if the child was
    never synchronized or is out-of-sync with the parent. The other options MUST
    be added in the abbreviated form. The options MAY be spread over more than
    one DIO message sent in a quick sequence. It is possible that the DIS is not
