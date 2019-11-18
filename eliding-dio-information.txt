@@ -6,11 +6,11 @@ ROLL                                                     P. Thubert, Ed.
 Internet-Draft                                             Cisco Systems
 Updates: 6550 (if approved)                                  R.A. Jadhav
 Intended status: Standards Track                             Huawei Tech
-Expires: 8 May 2020                                              L. Zhao
+Expires: 20 May 2020                                             L. Zhao
                                                            Cisco Systems
                                                               D. Barthel
                                                              Orange Labs
-                                                         5 November 2019
+                                                        17 November 2019
 
 
                   Eliding and Querying RPL Information
@@ -19,12 +19,12 @@ Expires: 8 May 2020                                              L. Zhao
 Abstract
 
    This document presents a method to safely elide a group of RPL
-   options in a DIO message by synchonizing the state associated with
+   options in a DIO message by synchronizing the state associated with
    each of these options between parent and child using a new sequence
-   counter in DIO or DAO messages.  A child that missed a DIO message
-   with an update of any of those protected options detects it by the
-   change of sequence counter and queries the update with a DIS Message.
-   The draft also provides a method to fully elide the options in a DAO
+   counter in DIO messages.  A child that missed a DIO message with an
+   update of any of those protected options detects it by the change of
+   sequence counter and queries the update with a DIS Message.  The
+   draft also provides a method to fully elide the options in a DAO
    message.
 
 Status of This Memo
@@ -42,7 +42,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 May 2020.
+   This Internet-Draft will expire on 20 May 2020.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Thubert, et al.            Expires 8 May 2020                   [Page 1]
+Thubert, et al.            Expires 20 May 2020                  [Page 1]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Thubert, et al.            Expires 8 May 2020                   [Page 2]
+Thubert, et al.            Expires 20 May 2020                  [Page 2]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
@@ -165,7 +165,7 @@ Internet-Draft              Eliding RPL Info               November 2019
 
 
 
-Thubert, et al.            Expires 8 May 2020                   [Page 3]
+Thubert, et al.            Expires 20 May 2020                  [Page 3]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
@@ -221,7 +221,7 @@ Internet-Draft              Eliding RPL Info               November 2019
 
 
 
-Thubert, et al.            Expires 8 May 2020                   [Page 4]
+Thubert, et al.            Expires 20 May 2020                  [Page 4]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
@@ -277,7 +277,7 @@ Internet-Draft              Eliding RPL Info               November 2019
 
 
 
-Thubert, et al.            Expires 8 May 2020                   [Page 5]
+Thubert, et al.            Expires 20 May 2020                  [Page 5]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
@@ -333,7 +333,7 @@ Internet-Draft              Eliding RPL Info               November 2019
 
 
 
-Thubert, et al.            Expires 8 May 2020                   [Page 6]
+Thubert, et al.            Expires 20 May 2020                  [Page 6]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
@@ -389,7 +389,7 @@ Internet-Draft              Eliding RPL Info               November 2019
 
 
 
-Thubert, et al.            Expires 8 May 2020                   [Page 7]
+Thubert, et al.            Expires 20 May 2020                  [Page 7]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
@@ -445,7 +445,7 @@ Internet-Draft              Eliding RPL Info               November 2019
 
 
 
-Thubert, et al.            Expires 8 May 2020                   [Page 8]
+Thubert, et al.            Expires 20 May 2020                  [Page 8]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
@@ -501,7 +501,7 @@ Internet-Draft              Eliding RPL Info               November 2019
 
 
 
-Thubert, et al.            Expires 8 May 2020                   [Page 9]
+Thubert, et al.            Expires 20 May 2020                  [Page 9]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
@@ -557,7 +557,7 @@ Internet-Draft              Eliding RPL Info               November 2019
 
 
 
-Thubert, et al.            Expires 8 May 2020                  [Page 10]
+Thubert, et al.            Expires 20 May 2020                 [Page 10]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
@@ -613,7 +613,7 @@ Internet-Draft              Eliding RPL Info               November 2019
 
 
 
-Thubert, et al.            Expires 8 May 2020                  [Page 11]
+Thubert, et al.            Expires 20 May 2020                 [Page 11]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
@@ -644,7 +644,7 @@ Internet-Draft              Eliding RPL Info               November 2019
    The DIO message that is sent in response MUST contain in full all the
    options that are requested and that were updated since the Last
    Synchronized RCSS in the DIS Message.  This means all of the
-   protected options of the child was never synchronized or is out-of-
+   protected options if the child was never synchronized or is out-of-
    sync with the parent.  The other options MUST be added in the
    abbreviated form.  The options MAY be spread over more than one DIO
    message sent in a quick sequence.  It is possible that the DIS is not
@@ -669,7 +669,7 @@ Internet-Draft              Eliding RPL Info               November 2019
 
 
 
-Thubert, et al.            Expires 8 May 2020                  [Page 12]
+Thubert, et al.            Expires 20 May 2020                 [Page 12]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
@@ -725,7 +725,7 @@ Internet-Draft              Eliding RPL Info               November 2019
 
 
 
-Thubert, et al.            Expires 8 May 2020                  [Page 13]
+Thubert, et al.            Expires 20 May 2020                 [Page 13]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
@@ -781,7 +781,7 @@ Internet-Draft              Eliding RPL Info               November 2019
 
 
 
-Thubert, et al.            Expires 8 May 2020                  [Page 14]
+Thubert, et al.            Expires 20 May 2020                 [Page 14]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
@@ -837,7 +837,7 @@ Internet-Draft              Eliding RPL Info               November 2019
 
 
 
-Thubert, et al.            Expires 8 May 2020                  [Page 15]
+Thubert, et al.            Expires 20 May 2020                 [Page 15]
 
 Internet-Draft              Eliding RPL Info               November 2019
 
@@ -893,4 +893,4 @@ Authors' Addresses
 
 
 
-Thubert, et al.            Expires 8 May 2020                  [Page 16]
+Thubert, et al.            Expires 20 May 2020                 [Page 16]
